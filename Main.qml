@@ -14,7 +14,10 @@ Window {
 	// FileModel{
 	// id:fileModel
 	// }
-	UiModel{ id: uiModel}
+	UiModel{ 
+		id: uiModel
+		property string selectedFilePath
+	}
 
 	Rectangle{
 		id: menuRect
@@ -35,19 +38,25 @@ Window {
 				// text: fileModel.test()
 			// }
 			Button{
-				text:"open"
+				text:"Open"
 				onClicked: dial.open()
 			}
-			// Button{
-			// 	id: button
-			// 	// id:testBtn
-			// 	text: "Save"
-			// 	// onClicked:dial.open()
-			// // Connections {
-			// // 	target: button
-			// // 	 function onClicked() {dial.open()}
-			// // }
+			Button{
+				id: saveBtn
+				text: "Save"
+				onClicked:{
+						if (uiModel.selectedFilePath!="") {
+							uiModel.writeFile(uiModel.selectedFilePath, textArea.text)
+						}else{
+							saveDial.fileMode = FileDialog.SaveFile
+							saveDial.open()
+						}
+					}
+			// Connections {
+			// 	target: button
+			// 	 function onClicked() {dial.open()}
 			// }
+			}
 		}
 	}
 	Flickable{
@@ -77,9 +86,19 @@ Window {
 	}
 	FileDialog{
 		id:dial
+		fileMode: FileDialog.OpenFile	
 		onAccepted: {
-			pathText.text = selectedFile
+			// pathText.text = selectedFile
+			uiModel.selectedFilePath = selectedFile
 			textArea.text = uiModel.readFile(selectedFile)
+		}
+	}
+	FileDialog{
+		id:saveDial
+		fileMode: FileDialog.SaveFile	
+		onAccepted: {
+			uiModel.selectedFilePath = selectedFile
+			uiModel.writeFile(selectedFile,textArea.text)
 		}
 	}
 }
