@@ -13,7 +13,8 @@ int main(int argc, char *argv[]) {
 
 
 	UiModel model;
-	qmlRegisterType<UiModel>("my",1,0,"UiModel");
+	// qmlRegisterType<UiModel>("my",1,0,"UiModel");
+	engine.rootContext()->setContextProperty("uiModel",&model);
 
 	QObject::connect(
 			&engine, &QQmlApplicationEngine::objectCreationFailed, &app,

@@ -20,6 +20,7 @@ qt_add_qml_module(appPKM_03_qml
     VERSION 1.0
     QML_FILES
         Main.qml
+				qml/TextListItem.qml
 		SOURCES
 				main.cpp
 				uiModel.cpp

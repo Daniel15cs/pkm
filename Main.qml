@@ -1,8 +1,10 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
-import my 1.0;
-// import PKM_03_qml;
+pragma ComponentBehavior: Bound
+// 
+// import my 1.0;
+//
 Window {
 	id:root
 	width: 640
@@ -69,20 +71,53 @@ Window {
 		// clip: true
     // contentWidth: textArea.width; contentHeight: textArea.height
 
-			TextArea.flickable: TextArea{
-				id: textArea
-				focus: true
-				anchors.fill: parent
-
-				// anchors.left: rect.right
-				// anchors.top: parent.top
-				// anchors.bottom: parent.bottom
-				// anchors.right: parent.right
-				placeholderText: "Enter text"
-				// textFormat: TextEdit.MarkdownText
-				renderType:Text.CurveRendering
-				// wrapMode: Text.Wrap
+			ListModel{ id:listModel }
+			Component{
+					id:textDel
+				TextListItem{
+					model:listModel
+				}
 			}
+
+		ListView{
+			id:listGrid
+			spacing:2
+			anchors.fill:parent
+			model: listModel
+			delegate: textDel
+			Button{
+				text:"+"
+				width:parent.width
+				anchors.bottom:parent.bottom
+				onClicked:{
+					listModel.append({_text:1,index:listModel.count-1})
+					// console.log("element is added by btn")
+				}
+				background: Rectangle {
+					// implicitWidth: 100
+					// implicitHeight: 40
+					opacity: enabled ? 1 : 0.3
+					color: "black"
+				}
+			}
+		}
+			// TextArea.flickable: TextArea{
+			// 	id: textArea
+			// 	focus: true
+			// 	anchors.right: parent.right
+			// 	anchors.left:parent.left
+			// 	// anchors.top:parent.top
+			// 	height: 20
+			//
+			// 	// anchors.left: rect.right
+			// 	// anchors.top: parent.top
+			// 	// anchors.bottom: parent.bottom
+			// 	// anchors.right: parent.right
+			// 	placeholderText: "Enter text"
+			// 	// textFormat: TextEdit.MarkdownText
+			// 	renderType:Text.CurveRendering
+			// 	// wrapMode: Text.Wrap
+			// }
 	}
 	FileDialog{
 		id:dial
