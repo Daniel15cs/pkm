@@ -12,15 +12,11 @@
 #include "BlockSystem/textBlock.h"
 #pragma once
 
-Q_DECLARE_METATYPE(TextBlock*);
 class MyListModel : public QAbstractListModel{
 	Q_OBJECT
 	QML_ELEMENT
 	enum ListRoles{
-		ListDataRole = Qt::UserRole+1,
-		TextBlockRole, 
-		LogicBlockRole,
-		TypeNameRole,
+		LogicBlockRole = Qt::UserRole+1,
 	};
 public:
 	explicit MyListModel (QObject *parent = nullptr): QAbstractListModel(parent){}
@@ -30,11 +26,12 @@ public:
 	QHash<int,QByteArray> roleNames() const override;
 	bool setData(const QModelIndex &index, const QVariant &value, const int role) override;
 	Qt::ItemFlags flags(const QModelIndex &index)const override;
-	Q_INVOKABLE QVariant displayData(const QModelIndex &index);
+
 	Q_INVOKABLE bool append(Block *b);
 	Q_INVOKABLE bool append();
 	Q_INVOKABLE void removeRow(const int index);
-
+	//
+	// Q_INVOKABLE QVariant displayData(const QModelIndex &index);
 	// void setModelData(const QStringList& data);
 private:
 	QVector<Block*> blockList;

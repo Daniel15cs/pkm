@@ -32,10 +32,6 @@ Window {
 				id: pathText
 				text: "Path"
 			}
-				
-			// Text{
-				// text: fileModel.test()
-			// }
 			Button{
 				text:"Open"
 				onClicked: dial.open()
@@ -64,13 +60,10 @@ Window {
 		anchors.left: menuRect.right
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
+		// boundsBehavior: Flickable.DragOverBounds
 
 		// clip: true
     // contentWidth: textArea.width; contentHeight: textArea.height
-
-			// MyListModel{ id:listModel 
-			// }
-
 		ListView{
 			id:listGrid
 			spacing:2
@@ -82,41 +75,30 @@ Window {
 				_width: flickable.width
         required property int index
 			}
-			
-			// Row{
-			// 	required property string listdata
-			// 	required property string andata
-			// 	Label{
-			// 		width:100
-			// 		height:40
-			// 		text: parent.listdata+":"+parent.andata
-			// 		background: Rectangle {
-			// 			opacity: enabled ? 1 : 0.3
-			// 			color:"grey" 
-			// 		}
-			// 	}
-			// 	Button{onClicked:{console.log(parent.listdata)}}
-			// }
-		}
-		Label{
-			text: "labelText"
-			anchors.bottom:addBtn.bottom
-		}
+			HoverHandler{ 
+				id:hover
+			}
+			footer: Item{ 
+				width:parent.width
+				// anchors.top:parent.bottom
+				height:50
+			}
 			Button{
+				HoverHandler{ id:btnHover}
 				id:addBtn
 				text:"+"
 				width:parent.width
-				anchors.bottom:parent.bottom
+				anchors. bottom:parent.bottom
+				visible:hover.hovered | btnHover.hovered
 				onClicked:{
 					myListModel.append()
 				}
 				background: Rectangle {
-					// implicitWidth: 100
-					// implicitHeight: 40
 					opacity: enabled ? 1 : 0.3
-					color: "grey"
+					color: "black"
 				}
 			}
+		}
 
 	}
 	FileDialog{
