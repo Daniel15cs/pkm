@@ -7,6 +7,7 @@
 #include <QAbstractTableModel>
 #include <qabstractitemmodel.h>
 #include <qcontainerfwd.h>
+#include <qjsondocument.h>
 #include <qnamespace.h>
 #include <qtmetamacros.h>
 #include "BlockSystem/textBlock.h"
@@ -30,6 +31,8 @@ public:
 	Q_INVOKABLE bool append(Block *b);
 	Q_INVOKABLE bool append();
 	Q_INVOKABLE void removeRow(const int index);
+	Q_INVOKABLE QByteArray listToJson();
+	Q_INVOKABLE void parseJson(QByteArray input);
 	//
 	// Q_INVOKABLE QVariant displayData(const QModelIndex &index);
 	// void setModelData(const QStringList& data);

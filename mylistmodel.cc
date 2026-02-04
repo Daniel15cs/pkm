@@ -1,8 +1,14 @@
 // #include <filesystem>
 #include<mylistmodel.h>
 #include <qabstractitemmodel.h>
+#include <qiodevicebase.h>
+#include <qjsonarray.h>
+#include <qjsondocument.h>
+#include <qjsonobject.h>
+#include <qlogging.h>
 #include <qnamespace.h>
 #include <qpointer.h>
+#include <qstringview.h>
 #include <qvariant.h>
 #include <QDebug>
 int MyListModel::rowCount(const QModelIndex &parent) const{
@@ -77,4 +83,63 @@ void MyListModel::removeRow(const int index){
 	this->beginRemoveRows(QModelIndex(),ir,ir);
 	blockList.removeAt(ir);
 	this->endRemoveRows();
+}
+
+QByteArray MyListModel::listToJson(){
+	QJsonArray array;
+  QJsonObject obj;
+
+	obj.insert("PageName","PKM_03");
+	array.append(obj);
+
+	for(auto item:blockList){
+			array.append(item->blockToJson());
+	}
+	QJsonDocument doc(array);
+	return doc.toJson(QJsonDocument::Indented);
+}
+
+void MyListModel::parseJson(QByteArray input){
+	QJsonArray array = QJsonDocument::fromJson(input).array();
+	qDebug()<<"array: "<<array;
+
+	if(rowCount()>0){
+		//TODO: спочатку спитати чи видаляти що є на сторінці
+		//WARNING: it doesnt work
+		blockList.clear();
+	}
+	for(auto item: array){
+		auto obj = item.toObject();
+		QString blockType;
+		qDebug()<<"obj: "<< obj;
+
+		if(!obj.contains("type"))
+			continue;
+
+		blockType = obj.value("type").toString();
+		qDebug()<<"type: "<<blockType;
+
+		Block *b;
+		if(blockType=="TextBlock"){
+			TextBlock *tb = new TextBlock;
+			tb->textChanged(obj.value("text").toString());
+			b=tb;
+			qDebug()<<"text: "<<tb->text();
+
+		}else if(blockType=="Block"){
+			
+		}else{
+			return;
+		}
+		
+		int rc = rowCount();
+		this->beginInsertRows(QModelIndex(),rc,rc);
+		blockList.append(b);
+		qDebug()<<"append";
+		this->endInsertRows();
+		emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
+		// delete(b);
+	}
+	qDebug()<<"parse";
+
 }

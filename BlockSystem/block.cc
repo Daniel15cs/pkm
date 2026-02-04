@@ -3,3 +3,6 @@
 QString Block::typeName()const{
 	return "Block";
 }
+QJsonObject Block::blockToJson()const{
+	return QJsonObject({{"type",typeName()}});
+}

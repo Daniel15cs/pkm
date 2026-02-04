@@ -7,14 +7,13 @@
 #include <qqmlintegration.h>
 #include <qtmetamacros.h>
 #include <QObject>
-#include <QtQml>
+// #include <QtQml>
 
 class FileModel : public QObject{
     Q_OBJECT
 		QML_ELEMENT
 public:
-    explicit FileModel(QObject *parent = nullptr);
-    Q_INVOKABLE int test();
+    explicit FileModel(QObject *parent = nullptr):QObject(parent){}
 public slots:
 	 QString readFile(const QString &oldPath);
 	 void writeFile(const QString &path, QString input);

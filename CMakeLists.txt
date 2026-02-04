@@ -12,6 +12,7 @@ qt_add_executable(appPKM_03_qml
     main.cc
 		uiModel.cc uiModel.h
 		mylistmodel.cc mylistmodel.h
+    filemodel.h filemodel.cc
 )
 
 add_subdirectory(BlockSystem)
@@ -25,7 +26,7 @@ qt_add_qml_module(appPKM_03_qml
 				main.cc
 				uiModel.cc uiModel.h
 				mylistmodel.cc mylistmodel.h
-				# filemodel.h filemodel.cc
+				filemodel.h filemodel.cc
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

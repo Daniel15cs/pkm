@@ -10,14 +10,29 @@ Window {
 	title: "Test"
 	color: "black"
 
-	// FileModel{
-	// id:fileModel
-	// }
-	UiModel{ 
-		id: uiModel
+	FileModel{
+	id:fileModel
 		property string selectedFilePath
 	}
-
+	FileDialog{
+		id:dial
+		fileMode: FileDialog.OpenFile	
+		onAccepted: {
+			pathText.text = selectedFile
+			fileModel.selectedFilePath = selectedFile
+			myListModel.parseJson(fileModel.readFile(selectedFile))
+		}
+	}
+	FileDialog{
+		id:saveDial
+		fileMode: FileDialog.SaveFile	
+		onAccepted: {
+			fileModel.selectedFilePath = selectedFile
+			fileModel.writeFile(selectedFile, myListModel.listToJson());
+			// uiModel.selectedFilePath = selectedFile
+			// uiModel.writeFile(selectedFile,textArea.text)
+		}
+	}
 	Rectangle{
 		id: menuRect
 		color:"grey"
@@ -40,8 +55,8 @@ Window {
 				id: saveBtn
 				text: "Save"
 				onClicked:{
-						if (uiModel.selectedFilePath!="") {
-							// uiModel.writeFile(uiModel.selectedFilePath, textArea.text)
+						if (fileModel.selectedFilePath!="") {
+							fileModel.writeFile(fileModel.selectedFilePath, myListModel.listToJson());
 						}else{
 							saveDial.fileMode = FileDialog.SaveFile
 							saveDial.open()
@@ -100,22 +115,5 @@ Window {
 			}
 		}
 
-	}
-	FileDialog{
-		id:dial
-		fileMode: FileDialog.OpenFile	
-		onAccepted: {
-			// pathText.text = selectedFile
-			uiModel.selectedFilePath = selectedFile
-			// textArea.text = uiModel.readFile(selectedFile)
-		}
-	}
-	FileDialog{
-		id:saveDial
-		fileMode: FileDialog.SaveFile	
-		onAccepted: {
-			uiModel.selectedFilePath = selectedFile
-			// uiModel.writeFile(selectedFile,textArea.text)
-		}
 	}
 }
