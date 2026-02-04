@@ -8,13 +8,13 @@ find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
 qt_standard_project_setup(REQUIRES 6.8)
-
 qt_add_executable(appPKM_03_qml
-    main.cpp
-		uiModel.cpp
-		uiModel.h
+    main.cc
+		uiModel.cc uiModel.h
+		mylistmodel.cc mylistmodel.h
 )
 
+add_subdirectory(BlockSystem)
 qt_add_qml_module(appPKM_03_qml
     URI PKM_03_qml
     VERSION 1.0
@@ -22,10 +22,10 @@ qt_add_qml_module(appPKM_03_qml
         Main.qml
 				qml/TextListItem.qml
 		SOURCES
-				main.cpp
-				uiModel.cpp
-				uiModel.h
-        SOURCES filemodel.h filemodel.cpp
+				main.cc
+				uiModel.cc uiModel.h
+				mylistmodel.cc mylistmodel.h
+				# filemodel.h filemodel.cc
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

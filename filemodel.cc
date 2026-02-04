@@ -1,10 +1,16 @@
 #include <qtmetamacros.h>
-#include <uiModel.h>
+#include "filemodel.h"
+
+#include <QDebug>
 #include <QUrl>
 
-QString urlToString(const QString &_qurl);
+QString urlToString(const QString &_qurl){
+	QUrl url(_qurl);
+	const QString &path = url.toLocalFile();
+	return path;
+}
 
-QString UiModel::readFile(const QString &oldPath){
+QString FileModel::readFile(const QString &oldPath){
 	QString path = urlToString(oldPath);
 	qDebug()<<"My| readfile()"<<path;
 	QFile file(path);
@@ -15,16 +21,11 @@ QString UiModel::readFile(const QString &oldPath){
 	return "Error";
 
 }
-void UiModel::writeFile(const QString &url,const QString input){
+void FileModel::writeFile(const QString &url,const QString input){
 	QString path = urlToString(url);
 	QFile file(path);
 	if(file.open(QFile::WriteOnly | QFile::Truncate)){
 		QTextStream out(&file);
 		out << input;
 	}
-}
-QString urlToString(const QString &_qurl){
-	QUrl url(_qurl);
-	const QString &path = url.toLocalFile();
-	return path;
 }

@@ -1,14 +1,19 @@
 import QtQuick
 import QtQuick.Controls
-
 pragma ComponentBehavior: Bound
 Item{
 	id:baseItem
 	property int _height: 30
-	property int _width:parent?.width
+	property int _width:100
+
+	// required property string text
+	required property var logicobject
+	required property string typename
 	required property var model
-	property string _text
-	property int index
+	// required property var listView
+
+	property var _logic: logicobject
+	property string _text: logicobject.text_p
 	height:_height
 	width:_width
 	Row{
@@ -17,11 +22,11 @@ Item{
 			id: compText
 			height:baseItem._height
 			width:baseItem._width-25
-
 			onTextChanged:{
-				console.log("on text change ")
+				baseItem.logicobject.textChanged(text)
 				if(baseItem._height<contentHeight)
-				baseItem._height=contentHeight+8
+					baseItem._height=contentHeight+8
+				// console.log("_text: "+text+" logic:"+baseItem._logic.text_p)
 			}
 			verticalAlignment:TextEdit.AlignVCenter	
 			text: baseItem._text
@@ -38,8 +43,10 @@ Item{
 				color:"black" 
 			}
 			onClicked:{
-				console.log("textis: "+baseItem._text)
-				baseItem.model?.remove(baseItem.index)
+				// baseItem._logic.deleteObj()
+				if (index>=0){
+					baseItem.model.removeRow(index);
+				}
 			}
 		}
 	}

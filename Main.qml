@@ -2,9 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 pragma ComponentBehavior: Bound
-// 
-// import my 1.0;
-//
 Window {
 	id:root
 	width: 640
@@ -48,7 +45,7 @@ Window {
 				text: "Save"
 				onClicked:{
 						if (uiModel.selectedFilePath!="") {
-							uiModel.writeFile(uiModel.selectedFilePath, textArea.text)
+							// uiModel.writeFile(uiModel.selectedFilePath, textArea.text)
 						}else{
 							saveDial.fileMode = FileDialog.SaveFile
 							saveDial.open()
@@ -71,53 +68,56 @@ Window {
 		// clip: true
     // contentWidth: textArea.width; contentHeight: textArea.height
 
-			ListModel{ id:listModel }
-			Component{
-					id:textDel
-				TextListItem{
-					model:listModel
-				}
-			}
+			// MyListModel{ id:listModel 
+			// }
 
 		ListView{
 			id:listGrid
 			spacing:2
 			anchors.fill:parent
-			model: listModel
-			delegate: textDel
+			model: myListModel
+			delegate: TextListItem{
+				id:textDel
+				model:myListModel
+				_width: flickable.width
+        required property int index
+			}
+			
+			// Row{
+			// 	required property string listdata
+			// 	required property string andata
+			// 	Label{
+			// 		width:100
+			// 		height:40
+			// 		text: parent.listdata+":"+parent.andata
+			// 		background: Rectangle {
+			// 			opacity: enabled ? 1 : 0.3
+			// 			color:"grey" 
+			// 		}
+			// 	}
+			// 	Button{onClicked:{console.log(parent.listdata)}}
+			// }
+		}
+		Label{
+			text: "labelText"
+			anchors.bottom:addBtn.bottom
+		}
 			Button{
+				id:addBtn
 				text:"+"
 				width:parent.width
 				anchors.bottom:parent.bottom
 				onClicked:{
-					listModel.append({_text:1,index:listModel.count-1})
-					// console.log("element is added by btn")
+					myListModel.append()
 				}
 				background: Rectangle {
 					// implicitWidth: 100
 					// implicitHeight: 40
 					opacity: enabled ? 1 : 0.3
-					color: "black"
+					color: "grey"
 				}
 			}
-		}
-			// TextArea.flickable: TextArea{
-			// 	id: textArea
-			// 	focus: true
-			// 	anchors.right: parent.right
-			// 	anchors.left:parent.left
-			// 	// anchors.top:parent.top
-			// 	height: 20
-			//
-			// 	// anchors.left: rect.right
-			// 	// anchors.top: parent.top
-			// 	// anchors.bottom: parent.bottom
-			// 	// anchors.right: parent.right
-			// 	placeholderText: "Enter text"
-			// 	// textFormat: TextEdit.MarkdownText
-			// 	renderType:Text.CurveRendering
-			// 	// wrapMode: Text.Wrap
-			// }
+
 	}
 	FileDialog{
 		id:dial
@@ -125,7 +125,7 @@ Window {
 		onAccepted: {
 			// pathText.text = selectedFile
 			uiModel.selectedFilePath = selectedFile
-			textArea.text = uiModel.readFile(selectedFile)
+			// textArea.text = uiModel.readFile(selectedFile)
 		}
 	}
 	FileDialog{
@@ -133,13 +133,7 @@ Window {
 		fileMode: FileDialog.SaveFile	
 		onAccepted: {
 			uiModel.selectedFilePath = selectedFile
-			uiModel.writeFile(selectedFile,textArea.text)
+			// uiModel.writeFile(selectedFile,textArea.text)
 		}
 	}
 }
-// Rectangle{
-// 	id:rect
-// 	color:"black"
-//
-//
-// }
