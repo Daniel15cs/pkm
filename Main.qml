@@ -76,10 +76,8 @@ Window {
 	
 		ListView{
 			id:listGrid
-			spacing:30
 			anchors.fill:parent
 			model: myListModel
-
 			onCurrentIndexChanged:{
 				currentItem._loader.item.onCurrent()
 			}
@@ -112,7 +110,6 @@ Window {
 					model:listGrid.model
 					_width: flickable.width
 					index: delItem.index
-					// _focus: delItem.focus
 					listView: listGrid
 					}
 				}
@@ -122,14 +119,27 @@ Window {
 						model:listGrid.model
 						_width: flickable.width
 						index: delItem.index
-					listView: listGrid
-
+						listView: listGrid
 					}
 				}
 			}
 
 			HoverHandler{ 
 				id:hover
+			}
+			header:Item{
+				width:parent.width
+				height: 100
+				TextField{
+					text:  "New page"
+					placeholderText: "Unnamed"
+					width:parent.width
+					font.pixelSize: 22
+					font.bold: true
+					horizontalAlignment: Text.AlignHCenter
+					background: Item{}
+
+				}
 			}
 			footer: Item{ 
 				width:parent.width
