@@ -10,6 +10,7 @@
 #include <qjsondocument.h>
 #include <qnamespace.h>
 #include <qtmetamacros.h>
+#include <qtypes.h>
 #include "BlockSystem/block.h"
 #include "BlockSystem/textBlock.h"
 #include "BlockSystem/checkboxBlock.h"
@@ -33,8 +34,9 @@ public:
 	Q_INVOKABLE bool append(Block *b);
 	Q_INVOKABLE bool append();
 	Q_INVOKABLE bool append(QVariant blockType);
+	Q_INVOKABLE bool insert(QVariant blockType, const int index);
 	Q_INVOKABLE void removeRow(const int index);
-Q_INVOKABLE QByteArray listToJson();
+	Q_INVOKABLE QByteArray listToJson();
 	Q_INVOKABLE void parseJson(QByteArray input);
 	Q_INVOKABLE QVariant getLogic(const int _index);
 	//

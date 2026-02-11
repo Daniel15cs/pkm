@@ -17,5 +17,5 @@ QString TextBlock::typeName()const{
 }
 QJsonObject TextBlock::blockToJson()const{
 	return QJsonObject({
-		{"type",typeName()}, {"text",text()},{"state",true}});
+		{"type",typeName()}, {"text",text()}});
 }

@@ -2,17 +2,25 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
 pragma ComponentBehavior: Bound
-Window {
+ApplicationWindow {
 	id:root
 	width: 640
 	height: 480
 	visible: true
-	title: "Test"
+	title: "My_own_PKM"
 	color: "black"
+
 
 	FileModel{
 	id:fileModel
 		property string selectedFilePath
+	}
+	MessageDialog{
+		id:clearConfirm
+		title: "Confirm"
+		informativeText:"Are you sure to clean current page?"
+		buttons: MessageDialog.Ok | MessageDialog.Cancel
+		onAccepted:{ dial.open() }
 	}
 	FileDialog{
 		id:dial
@@ -20,6 +28,7 @@ Window {
 		onAccepted: {
 			pathText.text = selectedFile
 			fileModel.selectedFilePath = selectedFile
+
 			myListModel.parseJson(fileModel.readFile(selectedFile))
 		}
 	}
@@ -47,7 +56,11 @@ Window {
 			}
 			Button{
 				text:"Open"
-				onClicked: dial.open()
+				onClicked: {
+					if(listGrid.model.rowCount()>0)
+						clearConfirm.open()
+					else dial.open()
+				}
 			}
 			Button{
 				id: saveBtn
@@ -60,10 +73,6 @@ Window {
 							saveDial.open()
 						}
 					}
-			// Connections {
-			// 	target: button
-			// 	 function onClicked() {dial.open()}
-			// }
 			}
 		}
 	}
@@ -78,9 +87,12 @@ Window {
 			id:listGrid
 			anchors.fill:parent
 			model: myListModel
+
 			onCurrentIndexChanged:{
+				console.log("currind: "+currentIndex)
 				currentItem._loader.item.onCurrent()
 			}
+
 			Keys.onUpPressed: decrementCurrentIndex()
 			Keys.onDownPressed: incrementCurrentIndex()
 			delegate: Item{
@@ -90,7 +102,6 @@ Window {
 				property alias _loader:loader
 
 				Loader{ id:loader 
-					sourceComponent: checkboxDel
 					Component.onCompleted:{
 						var _model = listGrid.model
 						var type = _model.getLogic(delItem.index).typeName()
@@ -170,11 +181,15 @@ Window {
 						Menu{
 							title: "Add block"
 							Action{ text :"Text"
-								onTriggered: listGrid.model.append("textBlock")
+								onTriggered:{
+									listGrid.model.append("textBlock")
+									listGrid.currentIndex = listGrid.model.rowCount()-1
+								} 
 							}
 							Action{ text :"Checkbox"
 								onTriggered: {
 									listGrid.model.append("checkboxBlock")
+									listGrid.currentIndex = listGrid.model.rowCount()-1
 								}
 							}
 						}

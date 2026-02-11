@@ -80,7 +80,6 @@ bool MyListModel::append(){
 bool MyListModel::append(QVariant blockType){
 	int rc = rowCount();
 	Block *b;
-	// qDebug()<<"q Type: " <<blockType;
 	if (blockType.toString()=="checkboxBlock"){
 		b = new CheckboxBlock;
 	}else{
@@ -94,6 +93,23 @@ bool MyListModel::append(QVariant blockType){
 	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
 	return true;
 } 
+bool MyListModel::insert(QVariant blockType, const int _index){
+	int rc = _index;
+	Block *b;
+	if (blockType.toString()=="checkboxBlock"){
+		b = new CheckboxBlock;
+	}else{
+		b = new TextBlock;
+	}
+
+	this->beginInsertRows(QModelIndex(), rc,rc);
+	blockList.insert(rc,b);
+	this->endInsertRows();
+
+	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
+	return true;
+
+}
 void MyListModel::removeRow(const int index){
 	int ir = index;
 	if(ir>=rowCount() ||ir<0){
@@ -123,12 +139,15 @@ QByteArray MyListModel::listToJson(){
 void MyListModel::parseJson(QByteArray input){
 	QJsonArray array = QJsonDocument::fromJson(input).array();
 	qDebug()<<"array: "<<array;
+	int r = rowCount();
 
-	if(rowCount()>0){
-		//TODO: спочатку спитати чи видаляти що є на сторінці
-		//WARNING: it doesnt work
-		blockList.clear();
-	}
+	this->beginRemoveRows(QModelIndex(),0,r);
+	blockList.clear();
+	this->endRemoveRows();
+	emit dataChanged(index(0,0), index(r,0), {Qt::EditRole});
+
+	qDebug()<<"after clear: "<<rowCount();
+
 	for(auto item: array){
 		auto obj = item.toObject();
 		QString blockType;
@@ -141,14 +160,18 @@ void MyListModel::parseJson(QByteArray input){
 		qDebug()<<"type: "<<blockType;
 
 		Block *b;
-		if(blockType=="TextBlock"){
+		if(blockType=="textBlock"){
 			TextBlock *tb = new TextBlock;
 			tb->textChanged(obj.value("text").toString());
 			b=tb;
 			qDebug()<<"text: "<<tb->text();
 
-		}else if(blockType=="Block"){
-			
+		}else if(blockType=="checkboxBlock"){
+			CheckboxBlock *cb = new CheckboxBlock;
+			cb->textChanged(obj.value("text").toString());
+			cb->stateChanged(obj.value("state"));
+			qDebug()<<"statejson:" <<obj.value("state");
+			b=cb;
 		}else{
 			return;
 		}
