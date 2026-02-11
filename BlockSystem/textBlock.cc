@@ -1,5 +1,5 @@
 #include "textBlock.h"
-#include "mylistmodel.h"
+// #include "mylistmodel.h"
 #include <qjsonobject.h>
 #include <qvariant.h>
 QString TextBlock::text()const{
@@ -13,9 +13,9 @@ QVariant TextBlock::getData()const{
 	return res;
 }
 QString TextBlock::typeName()const{
-	return "TextBlock";
+	return "textBlock";
 }
 QJsonObject TextBlock::blockToJson()const{
 	return QJsonObject({
-		{"type",typeName()}, {"text",text()}});
+		{"type",typeName()}, {"text",text()},{"state",true}});
 }

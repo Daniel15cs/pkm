@@ -1,4 +1,5 @@
 // #include <filesystem>
+#include "BlockSystem/checkboxBlock.h"
 #include<mylistmodel.h>
 #include <qabstractitemmodel.h>
 #include <qiodevicebase.h>
@@ -15,6 +16,7 @@ int MyListModel::rowCount(const QModelIndex &parent) const{
 	return blockList.count();
 }
 QVariant MyListModel::data(const QModelIndex &index, int role) const{
+    if(index.row()<0 || index.row()>rowCount()) return QVariant();
 	switch(role){
 		case LogicBlockRole:{
 			QObject* obj = blockList.at(index.row());
@@ -36,7 +38,7 @@ QHash<int,QByteArray> MyListModel::roleNames() const {
 	return roles;
 }
 bool MyListModel::setData(const QModelIndex &index, const QVariant &value, const int role) {
-	qDebug()<<"setData()";
+	// qDebug()<<"setData()";
 	if(index.isValid()&&role==Qt::EditRole){
 		int ir = index.row();
 
@@ -55,8 +57,6 @@ Qt::ItemFlags MyListModel::flags(const QModelIndex &index)const{
 		return Qt::ItemIsEnabled;
 	return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
-
-
 bool MyListModel::append(Block *b){
 	int rc = rowCount();
 
@@ -77,8 +77,29 @@ bool MyListModel::append(){
 	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
 	return true;
 } 
+bool MyListModel::append(QVariant blockType){
+	int rc = rowCount();
+	Block *b;
+	// qDebug()<<"q Type: " <<blockType;
+	if (blockType.toString()=="checkboxBlock"){
+		b = new CheckboxBlock;
+	}else{
+		b = new TextBlock;
+	}
+
+	this->beginInsertRows(QModelIndex(), rc,rc);
+	blockList.append(b);
+	this->endInsertRows();
+
+	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
+	return true;
+} 
 void MyListModel::removeRow(const int index){
 	int ir = index;
+	if(ir>=rowCount() ||ir<0){
+		qDebug()<<"index: "<<ir<<" out of range";
+		return;
+	}
 
 	this->beginRemoveRows(QModelIndex(),ir,ir);
 	blockList.removeAt(ir);
@@ -142,4 +163,8 @@ void MyListModel::parseJson(QByteArray input){
 	}
 	qDebug()<<"parse";
 
+}
+QVariant MyListModel::getLogic(const int _index){
+	QModelIndex in = index(_index,0);
+	return data(in,LogicBlockRole);
 }

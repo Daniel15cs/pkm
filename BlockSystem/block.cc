@@ -1,7 +1,7 @@
 #include "block.h"
 #include <QVariant>
 QString Block::typeName()const{
-	return "Block";
+	return "block";
 }
 QJsonObject Block::blockToJson()const{
 	return QJsonObject({{"type",typeName()}});

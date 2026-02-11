@@ -10,7 +10,9 @@
 #include <qjsondocument.h>
 #include <qnamespace.h>
 #include <qtmetamacros.h>
+#include "BlockSystem/block.h"
 #include "BlockSystem/textBlock.h"
+#include "BlockSystem/checkboxBlock.h"
 #pragma once
 
 class MyListModel : public QAbstractListModel{
@@ -30,9 +32,11 @@ public:
 
 	Q_INVOKABLE bool append(Block *b);
 	Q_INVOKABLE bool append();
+	Q_INVOKABLE bool append(QVariant blockType);
 	Q_INVOKABLE void removeRow(const int index);
-	Q_INVOKABLE QByteArray listToJson();
+Q_INVOKABLE QByteArray listToJson();
 	Q_INVOKABLE void parseJson(QByteArray input);
+	Q_INVOKABLE QVariant getLogic(const int _index);
 	//
 	// Q_INVOKABLE QVariant displayData(const QModelIndex &index);
 	// void setModelData(const QStringList& data);

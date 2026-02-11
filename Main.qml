@@ -29,8 +29,6 @@ Window {
 		onAccepted: {
 			fileModel.selectedFilePath = selectedFile
 			fileModel.writeFile(selectedFile, myListModel.listToJson());
-			// uiModel.selectedFilePath = selectedFile
-			// uiModel.writeFile(selectedFile,textArea.text)
 		}
 	}
 	Rectangle{
@@ -75,45 +73,104 @@ Window {
 		anchors.left: menuRect.right
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
-		// boundsBehavior: Flickable.DragOverBounds
-
-		// clip: true
-    // contentWidth: textArea.width; contentHeight: textArea.height
+	
 		ListView{
 			id:listGrid
-			spacing:2
+			spacing:30
 			anchors.fill:parent
 			model: myListModel
-			delegate: TextListItem{
-				id:textDel
-				model:myListModel
-				_width: flickable.width
-        required property int index
+
+			onCurrentIndexChanged:{
+				currentItem._loader.item.onCurrent()
 			}
+			Keys.onUpPressed: decrementCurrentIndex()
+			Keys.onDownPressed: incrementCurrentIndex()
+			delegate: Item{
+				id:delItem
+				width: flickable.width
+				required property int index
+				property alias _loader:loader
+
+				Loader{ id:loader 
+					sourceComponent: checkboxDel
+					Component.onCompleted:{
+						var _model = listGrid.model
+						var type = _model.getLogic(delItem.index).typeName()
+						if(type === "textBlock"){
+							loader.sourceComponent = textDel
+						} else if(type === "checkboxBlock"){
+							loader.sourceComponent = checkboxDel
+						} else{
+							loader.sourceComponent = textDel
+						}
+					}
+				}
+
+				Component{
+					id:textDel
+					TextListItem{
+					model:listGrid.model
+					_width: flickable.width
+					index: delItem.index
+					// _focus: delItem.focus
+					listView: listGrid
+					}
+				}
+				Component{
+					id:checkboxDel
+					CheckboxListItem{
+						model:listGrid.model
+						_width: flickable.width
+						index: delItem.index
+					listView: listGrid
+
+					}
+				}
+			}
+
 			HoverHandler{ 
 				id:hover
 			}
 			footer: Item{ 
 				width:parent.width
 				// anchors.top:parent.bottom
-				height:50
-			}
-			Button{
-				HoverHandler{ id:btnHover}
-				id:addBtn
-				text:"+"
-				width:parent.width
-				anchors. bottom:parent.bottom
-				visible:hover.hovered | btnHover.hovered
-				onClicked:{
-					myListModel.append()
-				}
-				background: Rectangle {
-					opacity: enabled ? 1 : 0.3
-					color: "black"
+				height:200
+				// Rectangle{
+				// 	anchors.fill:parent
+				// 	color:"Grey"
+				// }
+
+				Button{
+					HoverHandler{ id:btnHover}
+					id:addBtn
+					text:"+"
+					// width:parent.width
+					// anchors. bottom:parent.bottom
+					anchors.fill:parent
+					visible:hover.hovered | btnHover.hovered
+					onClicked:{
+						itemMenu.popup()
+					}
+					background: Rectangle {
+						opacity: enabled ? 1 : 0.3
+						color: "black"
+					}
+					Menu{
+						id:itemMenu
+						Menu{
+							title: "Add block"
+							Action{ text :"Text"
+								onTriggered: listGrid.model.append("textBlock")
+							}
+							Action{ text :"Checkbox"
+								onTriggered: {
+									listGrid.model.append("checkboxBlock")
+								}
+							}
+						}
+					}
 				}
 			}
 		}
-
 	}
 }
