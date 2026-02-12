@@ -23,6 +23,7 @@ qt_add_qml_module(appPKM_03_qml
         Main.qml
 				qml/TextListItem.qml
 				qml/CheckboxListItem.qml
+				qml/PageItem.qml
 		SOURCES
 				main.cc
 				uiModel.cc uiModel.h

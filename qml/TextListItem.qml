@@ -3,7 +3,7 @@ import QtQuick.Controls
 pragma ComponentBehavior: Bound
 Item{
 	id:baseItem
-	property int _height: compText.contentHeight+8
+	property int _height: compText.contentHeight+6
 	property int _width:100
 	required property var model
 	required property int index
@@ -12,6 +12,11 @@ Item{
 	property string _text: logicobject?.text_p
 	height: _height
 	width:_width
+	property Item _body: bodySlot
+	property Item self: baseItem
+	property int _textMargin: 25
+	property alias _compText:compText
+	property string blockType:"textBlock"
 
 	// Component.onCompleted:{
 	// 	baseItem.listView.currentItem.height = baseItem._height
@@ -24,10 +29,15 @@ Item{
 	HoverHandler{ id:hover}
 	Row{
 		spacing:4
+		Item{
+			id:bodySlot
+			height:baseItem._height
+			// width:25
+		}
 		TextArea{
 			id: compText
 			height:baseItem._height
-			width:baseItem._width-25
+			width:baseItem._width-baseItem._textMargin
 			verticalAlignment:TextEdit.AlignVCenter
 			persistentSelection: true
 			text: baseItem._text
@@ -58,11 +68,11 @@ Item{
 					} else{
 						event.accepted = true
 						if(baseItem.index==baseItem.model.rowCount()){
-							baseItem.model.append("textBlock")
+							baseItem.model.append(baseItem.blockType)
 							baseItem.listView.incrementCurrentIndex()
 						}
 						else if(baseItem.index<baseItem.model.rowCount()){
-							baseItem.model.insert("textBlock",baseItem.index+1)
+							baseItem.model.insert(baseItem.blockType,baseItem.index+1)
 							baseItem.listView.incrementCurrentIndex()
 						}
 					}

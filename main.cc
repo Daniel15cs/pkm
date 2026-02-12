@@ -10,7 +10,8 @@ int main(int argc, char *argv[]) {
 
 	FileModel *fileModel = new FileModel(nullptr);
 	MyListModel myListModel(nullptr);
-	// myListModel.append();
+	myListModel.append("textBlock");
+	myListModel.append("checkboxBlock");
 
 	qRegisterMetaType<Block*>("Block*");
 	qmlRegisterUncreatableType<Block>("my",1,0,"Block","");    
