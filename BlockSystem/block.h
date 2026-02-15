@@ -8,7 +8,7 @@
 class Block: public QObject{
 	Q_OBJECT
 public:
-	explicit Block(QObject *parent = nullptr):QObject(parent){}
+	explicit Block(QObject *parent):QObject(parent){}
 	int num;
 	virtual QVariant getData()const=0;
 	Q_INVOKABLE virtual QString typeName()const=0;

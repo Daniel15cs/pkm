@@ -6,6 +6,7 @@ class TextBlock : public Block{
 	Q_OBJECT
 	Q_PROPERTY (QString text_p READ text CONSTANT);
 public: 
+	using Block::Block;
 	Q_INVOKABLE QString text()const;
 	QVariant getData() const override;
 	QString typeName()const override;

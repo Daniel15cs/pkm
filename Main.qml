@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
+// import myPageBlock
 pragma ComponentBehavior: Bound
 ApplicationWindow {
 	id:root
@@ -11,11 +12,11 @@ ApplicationWindow {
 	color: "black"
 	// onActiveFocusItemChanged: print(activeFocusItem)
 
-
 	FileModel{
 	id:fileModel
 		property string selectedFilePath
 	}
+
 	MessageDialog{
 		id:clearConfirm
 		title: "Confirm"
@@ -30,7 +31,7 @@ ApplicationWindow {
 			pathText.text = selectedFile
 			fileModel.selectedFilePath = selectedFile
 
-			myListModel.parseJson(fileModel.readFile(selectedFile))
+			// myListModel.parseJson(fileModel.readFile(selectedFile))
 		}
 	}
 	FileDialog{
@@ -38,7 +39,7 @@ ApplicationWindow {
 		fileMode: FileDialog.SaveFile	
 		onAccepted: {
 			fileModel.selectedFilePath = selectedFile
-			fileModel.writeFile(selectedFile, myListModel.listToJson());
+			fileModel.writeFile(selectedFile, controller.p_rootPage.myListModel.listToJson());
 		}
 	}
 	Rectangle{
@@ -67,29 +68,47 @@ ApplicationWindow {
 				id: saveBtn
 				text: "Save"
 				onClicked:{
-						if (fileModel.selectedFilePath!="") {
-							fileModel.writeFile(fileModel.selectedFilePath, myListModel.listToJson());
-						}else{
-							saveDial.fileMode = FileDialog.SaveFile
-							saveDial.open()
-						}
+					if (fileModel.selectedFilePath!="") {
+						fileModel.writeFile(fileModel.selectedFilePath, controller.p_rootPage.myListModel.listToJson());
+					}else{
+						saveDial.fileMode = FileDialog.SaveFile
+						saveDial.open()
 					}
+				}
+			}
+			Button{
+				text:"rootPage"
+				onPressed:{
+					// pageLoader.sourceComponent = pageItemdel
+					controller.getToOldPage()
+				}
 			}
 		}
 	}
 	Loader{
+		id:pageLoader
 		sourceComponent: pageItemdel
 		anchors.right: parent.right
 		anchors.left: menuRect.right
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
+		onLoaded:{
+			// pageLoader.item.ctrl = controller
+			// pageLoader.item.pageModel = controller.p_rootPage
+				console.log("main rootpage:" +controller.p_rootPage)
+		}
 	}
 	Component{
 		id:pageItemdel
-		PageItem{ 
+		PageView{ 
 			id:pageItem
+			pageModel: controller.p_rootPage
+			ctrl:controller
+			// Component.onCompleted:{
+			// 	pageItem.pageModel = rootPage
+			// }
 		}
-}
+	}
 
 
 }

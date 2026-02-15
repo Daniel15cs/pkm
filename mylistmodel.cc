@@ -1,6 +1,8 @@
 // #include <filesystem>
 #include "BlockSystem/checkboxBlock.h"
-#include<mylistmodel.h>
+#include "BlockSystem/pageBlock.h"
+#include <mylistmodel.h>
+
 #include <qabstractitemmodel.h>
 #include <qiodevicebase.h>
 #include <qjsonarray.h>
@@ -71,7 +73,7 @@ bool MyListModel::append(){
 	int rc = rowCount();
 
 	this->beginInsertRows(QModelIndex(), rc,rc);
-	blockList.append(new TextBlock());
+	blockList.append(new TextBlock(this));
 	this->endInsertRows();
 
 	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
@@ -81,9 +83,12 @@ bool MyListModel::append(QVariant blockType){
 	int rc = rowCount();
 	Block *b;
 	if (blockType.toString()=="checkboxBlock"){
-		b = new CheckboxBlock;
-	}else{
-		b = new TextBlock;
+		b = new CheckboxBlock(this);
+	}else if(blockType.toString()=="pageBlock"){
+		b = new PageBlock(this);
+	}
+	else{
+		b = new TextBlock(this);
 	}
 
 	this->beginInsertRows(QModelIndex(), rc,rc);
@@ -97,9 +102,9 @@ bool MyListModel::insert(QVariant blockType, const int _index){
 	int rc = _index;
 	Block *b;
 	if (blockType.toString()=="checkboxBlock"){
-		b = new CheckboxBlock;
+		b = new CheckboxBlock(this);
 	}else{
-		b = new TextBlock;
+		b = new TextBlock(this);
 	}
 
 	this->beginInsertRows(QModelIndex(), rc,rc);
@@ -161,13 +166,13 @@ void MyListModel::parseJson(QByteArray input){
 
 		Block *b;
 		if(blockType=="textBlock"){
-			TextBlock *tb = new TextBlock;
+			TextBlock *tb = new TextBlock(this);
 			tb->textChanged(obj.value("text").toString());
 			b=tb;
 			qDebug()<<"text: "<<tb->text();
 
 		}else if(blockType=="checkboxBlock"){
-			CheckboxBlock *cb = new CheckboxBlock;
+			CheckboxBlock *cb = new CheckboxBlock(this);
 			cb->textChanged(obj.value("text").toString());
 			cb->stateChanged(obj.value("state"));
 			qDebug()<<"statejson:" <<obj.value("state");

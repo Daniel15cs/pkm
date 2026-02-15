@@ -8,6 +8,7 @@ class CheckboxBlock : public Block{
 	Q_PROPERTY (QString text_p READ text CONSTANT);
 	Q_PROPERTY (int checkState_p READ checkState CONSTANT);
 public: 
+	using Block::Block;
 	Q_INVOKABLE QString text()const;
 	Q_INVOKABLE int checkState()const;
 	QVariant getData() const override;
