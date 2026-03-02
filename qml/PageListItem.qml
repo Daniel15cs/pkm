@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 pragma ComponentBehavior: Bound
 Item{
 	id:root
@@ -21,12 +22,22 @@ Item{
 		console.log("listItem logic: "+pageModel)
 		console.log("listItem model: "+root.model+"\n")
 	}
+	MessageDialog{
+		id:clearConfirm
+		title: "Confirm"
+		informativeText:"Are you sure to remove selected page?"
+		buttons: MessageDialog.Ok | MessageDialog.Cancel
+		onAccepted:{
+			root.model.removeRow(root.index);
+		} 
+	}
 	Row{
 		Button{
+			spacing: 4
 			// text: "PageBtn"
 			text: root.pageModel.pageName
 			height: root._height
-			width:root._width
+			width:root._width-25
 			onPressed:{
 				console.log(root.pageModel)
 				console.log("listItem rootpageold:" +root.controller.p_rootPage)
@@ -36,6 +47,22 @@ Item{
 			background:Rectangle{
 				color:"Black"
 			}
+		Button{
+			id:compBtn
+			text: "x"
+			height:root._height
+			width:25
+			// visible:root.hovered
+
+			background: Rectangle {
+				opacity: enabled ? 1 : 0.3
+				color:"black" 
+			}
+			onClicked:{
+				if (root.index>=0)
+					clearConfirm.open()
+			}
+		}
 		}
 	}
 
