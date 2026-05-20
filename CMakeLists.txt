@@ -8,23 +8,30 @@ find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
 qt_standard_project_setup(REQUIRES 6.8)
-
 qt_add_executable(appPKM_03_qml
-    main.cpp
-		uiModel.cpp
-		uiModel.h
+    main.cc
+		uiModel.cc uiModel.h
+		mylistmodel.cc mylistmodel.h
+    filemodel.h filemodel.cc
+		rootModelController.h rootModelController.cc
 )
 
+add_subdirectory(BlockSystem)
 qt_add_qml_module(appPKM_03_qml
     URI PKM_03_qml
     VERSION 1.0
     QML_FILES
         Main.qml
+				qml/TextListItem.qml
+				qml/CheckboxListItem.qml
+				qml/PageView.qml
+				qml/PageListItem.qml
 		SOURCES
-				main.cpp
-				uiModel.cpp
-				uiModel.h
-        SOURCES filemodel.h filemodel.cpp
+				main.cc
+				uiModel.cc uiModel.h
+				mylistmodel.cc mylistmodel.h
+				filemodel.h filemodel.cc
+				rootModelController.h rootModelController.cc
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -49,3 +56,4 @@ install(TARGETS appPKM_03_qml
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+set(CMAKE_AUTOMOC ON)  # увімкнути moc для всіх файлів

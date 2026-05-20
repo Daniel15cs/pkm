@@ -1,24 +1,47 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
-import my 1.0;
-// import PKM_03_qml;
-Window {
+// import myPageBlock
+pragma ComponentBehavior: Bound
+ApplicationWindow {
 	id:root
 	width: 640
 	height: 480
 	visible: true
-	title: "Test"
+	title: "My_own_PKM"
 	color: "black"
+	// onActiveFocusItemChanged: print(activeFocusItem)
 
-	// FileModel{
-	// id:fileModel
-	// }
-	UiModel{ 
-		id: uiModel
+	FileModel{
+	id:fileModel
 		property string selectedFilePath
 	}
 
+	MessageDialog{
+		id:clearConfirm
+		title: "Confirm"
+		informativeText:"Are you sure to clean current page?"
+		buttons: MessageDialog.Ok | MessageDialog.Cancel
+		onAccepted:{ dial.open() }
+	}
+	FileDialog{
+		id:dial
+		fileMode: FileDialog.OpenFile	
+		onAccepted: {
+			pathText.text = selectedFile
+			fileModel.selectedFilePath = selectedFile
+
+			// myListModel.parseJson(fileModel.readFile(selectedFile))
+		}
+	}
+	FileDialog{
+		id:saveDial
+		fileMode: FileDialog.SaveFile	
+		onAccepted: {
+			fileModel.selectedFilePath = selectedFile
+			fileModel.writeFile(selectedFile, controller.p_rootPage.myListModel.listToJson());
+		}
+	}
 	Rectangle{
 		id: menuRect
 		color:"grey"
@@ -26,85 +49,66 @@ Window {
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
 		anchors.left: parent.left
-		anchors.right: flickable.left
+		anchors.right: pageItemdel.left
 		Grid{
 			columns:1
 			Text{
 				id: pathText
 				text: "Path"
 			}
-				
-			// Text{
-				// text: fileModel.test()
-			// }
 			Button{
 				text:"Open"
-				onClicked: dial.open()
+				onClicked: {
+					if(myListModel.rowCount()>0)
+						clearConfirm.open()
+					else dial.open()
+				}
 			}
 			Button{
 				id: saveBtn
 				text: "Save"
 				onClicked:{
-						if (uiModel.selectedFilePath!="") {
-							uiModel.writeFile(uiModel.selectedFilePath, textArea.text)
-						}else{
-							saveDial.fileMode = FileDialog.SaveFile
-							saveDial.open()
-						}
+					if (fileModel.selectedFilePath!="") {
+						fileModel.writeFile(fileModel.selectedFilePath, controller.p_rootPage.myListModel.listToJson());
+					}else{
+						saveDial.fileMode = FileDialog.SaveFile
+						saveDial.open()
 					}
-			// Connections {
-			// 	target: button
-			// 	 function onClicked() {dial.open()}
-			// }
+				}
+			}
+			Button{
+				text:"rootPage"
+				onPressed:{
+					// pageLoader.sourceComponent = pageItemdel
+					controller.getToOldPage()
+				}
 			}
 		}
 	}
-	Flickable{
-		id: flickable
+	Loader{
+		id:pageLoader
+		sourceComponent: pageItemdel
 		anchors.right: parent.right
 		anchors.left: menuRect.right
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
-
-		// clip: true
-    // contentWidth: textArea.width; contentHeight: textArea.height
-
-			TextArea.flickable: TextArea{
-				id: textArea
-				focus: true
-				anchors.fill: parent
-
-				// anchors.left: rect.right
-				// anchors.top: parent.top
-				// anchors.bottom: parent.bottom
-				// anchors.right: parent.right
-				placeholderText: "Enter text"
-				// textFormat: TextEdit.MarkdownText
-				renderType:Text.CurveRendering
-				// wrapMode: Text.Wrap
-			}
-	}
-	FileDialog{
-		id:dial
-		fileMode: FileDialog.OpenFile	
-		onAccepted: {
-			// pathText.text = selectedFile
-			uiModel.selectedFilePath = selectedFile
-			textArea.text = uiModel.readFile(selectedFile)
+		onLoaded:{
+			// pageLoader.item.ctrl = controller
+			// pageLoader.item.pageModel = controller.p_rootPage
+				console.log("main rootpage:" +controller.p_rootPage)
 		}
 	}
-	FileDialog{
-		id:saveDial
-		fileMode: FileDialog.SaveFile	
-		onAccepted: {
-			uiModel.selectedFilePath = selectedFile
-			uiModel.writeFile(selectedFile,textArea.text)
+	Component{
+		id:pageItemdel
+		PageView{ 
+			id:pageItem
+			pageModel: controller.p_rootPage
+			ctrl:controller
+			// Component.onCompleted:{
+			// 	pageItem.pageModel = rootPage
+			// }
 		}
 	}
+
+
 }
-// Rectangle{
-// 	id:rect
-// 	color:"black"
-//
-//
-// }
