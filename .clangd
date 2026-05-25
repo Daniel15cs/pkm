@@ -1,0 +1,11 @@
+CompileFlags:
+  CompilationDatabase: build/Qt_6_8_2_qt6-Debug
+
+  Remove:
+    - -mno-direct-extern-access
+
+Diagnostics:
+  UnusedIncludes: None
+
+InlayHints:
+  Enabled: Yes

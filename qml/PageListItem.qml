@@ -12,15 +12,17 @@ Item{
 	required property int index
 	// required property var listView
 	// required property var pageLoader
-	required property var controller
-	property var pageModel: model.getLogic(root.index)
+	//TODO:
+	// required property var controller
+	
+	// property var pageModel: model.getLogic(root.index)
 	function onCurrent(){
 	}
 	Component.onCompleted:{
-		console.log("\nlistItem ctrl:"+controller)
-		console.log("listItem rootpage:" +root.controller.p_rootPage)
-		console.log("listItem logic: "+pageModel)
-		console.log("listItem model: "+root.model+"\n")
+		// console.log("\nlistItem ctrl:"+controller)
+		// console.log("listItem rootpage:" +root.controller.p_rootPage)
+		// console.log("listItem logic: "+pageModel)
+		// console.log("listItem model: "+root.model+"\n")
 	}
 	MessageDialog{
 		id:clearConfirm
@@ -35,7 +37,9 @@ Item{
 		Button{
 			spacing: 4
 			// text: "PageBtn"
-			text: root.pageModel.pageName
+			// TODO:
+			// text: root.pageModel.pageName
+			text:"test"
 			height: root._height
 			width:root._width-25
 			onPressed:{

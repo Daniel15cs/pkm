@@ -1,8 +1,8 @@
 #include "pageBlock.h"
-#include "mylistmodel.h"
+#include "PageModel.h"
 #include <qjsondocument.h>
 #include <qjsonobject.h>
-PageBlock::PageBlock() :Block(this), m_model(new MyListModel(this)){
+PageBlock::PageBlock() :Block(this), m_model(new PageModel(this)){
 
 	m_pageName = "inline page";
 }
@@ -13,7 +13,7 @@ void PageBlock::setPageName(QString _value){
 	m_pageName = _value;
 	emit pageNameChanged(m_pageName);
 }
-QPointer<MyListModel> PageBlock::model()const{
+QPointer<PageModel> PageBlock::model()const{
 	return m_model;
 }
 QVariant PageBlock::getData()const{

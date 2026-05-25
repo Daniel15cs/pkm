@@ -4,16 +4,18 @@ import QtQuick.Controls
 pragma ComponentBehavior: Bound
 Item{
 	id: root
-	property var ctrl
+	required property var pageModel
+	// property var ctrl
 	//WARNING: pageModel is null after  setRootpage	
-	property var pageModel: ctrl.p_rootPage
-	property var listModel: ctrl.p_rootPage.myListModel
+	
+	// property var pageModel: ctrl.p_rootPage
+	// property var listModel: ctrl.p_rootPage.pageModel
 	// required property var loader
 	Component.onCompleted:{
-		console.log("pageView ctrl:"+ctrl)
-		console.log("pageView pagemodel:"+pageModel)
-		console.log("pageView rootpage:" +root.ctrl.p_rootPage)
-		console.log("pageView mylistModel:" +root.ctrl.p_rootPage.myListModel)
+		// console.log("pageView ctrl:"+ctrl)
+		// console.log("pageView pagemodel:"+pageModel)
+		// console.log("pageView rootpage:" +root.ctrl.p_rootPage)
+		// console.log("pageView pageModel:" +root.ctrl.p_rootPage.pageModel)
 	}
 	Flickable{
 		id: flickable
@@ -22,7 +24,7 @@ Item{
 		ListView{
 			id:listGrid
 			anchors.fill:parent
-			model: root.listModel
+			model: root.pageModel
 			spacing:2
 
 			onCurrentIndexChanged:{
@@ -80,7 +82,9 @@ Item{
 						model:listGrid.model
 						_width: flickable.width
 						index: delItem.index
-						controller:root.ctrl
+						//TODO:
+						// controller:root.ctrl
+						
 						// listView: listGrid
 						// pageLoader: root.loader
 					}
@@ -95,7 +99,8 @@ Item{
 				height: 100
 				TextField{
 					id: pageTitle
-					text: root.pageModel.pageName
+					// TODO:
+					// text: root.pageModel.pageName
 					placeholderText: "Unnamed"
 					width:parent.width
 					font.pixelSize: 22
@@ -103,7 +108,8 @@ Item{
 					horizontalAlignment: Text.AlignHCenter
 					background: Item{}
 					onEditingFinished:{
-						root.pageModel.setPageName(text)
+						// TODO:
+						// root.pageModel.setPageName(text)
 					}
 
 				}
