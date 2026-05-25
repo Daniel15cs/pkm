@@ -1,6 +1,7 @@
 #include<QString>
 #include <QVariant>
 #include <QObject>
+#include <qjsonobject.h>
 #include <qtmetamacros.h>
 #include <QJsonObject>
 #pragma once
@@ -9,8 +10,16 @@ class Block: public QObject{
 	Q_OBJECT
 public:
 	explicit Block(QObject *parent):QObject(parent){}
-	int num;
+	// int num;
 	virtual QVariant getData()const=0;
 	Q_INVOKABLE virtual QString typeName()const=0;
 	virtual QJsonObject blockToJson()const=0;
+protected:
+	virtual QJsonObject prepToJson(QJsonObject content)const{
+		QJsonObject resObj;
+		resObj["type"] = typeName();
+		resObj["content"]=content;
+		return resObj;
+	}
 };
+

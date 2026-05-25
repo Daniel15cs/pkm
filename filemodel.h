@@ -5,6 +5,7 @@
 #include <qfilesystemmodel.h>
 #include <qlogging.h>
 #include <qqmlintegration.h>
+#include <qstringview.h>
 #include <qtmetamacros.h>
 #include <QObject>
 #include <qsqldatabase.h>
@@ -21,13 +22,13 @@ public:
 	Q_PROPERTY(int id MEMBER id)
 	Q_PROPERTY(int parentId MEMBER parentId)
 	Q_PROPERTY(QString type MEMBER type)
-	int id, parentId;
-	QString type;
+	int id, parentId=-1;
+	QString type="note";
+	QByteArray content;
 	bool operator==(const PageData&)const =default;
 	QML_VALUE_TYPE(pageData)
 };
 Q_DECLARE_METATYPE(PageData)
-	// QString content;
 	//properties
 	//childList maybe?
 
@@ -56,8 +57,8 @@ public:
 	void setPageContentToSql(QString _newContent,int pageId);
 
 	void addDataToSql(PageData _data);
-
-	void updateDbFromList(QVector<PageData> list);
+	bool idCheckInDb(int);
+	bool updateListToDb(QVector<PageData> list);
 	
 
 public slots:

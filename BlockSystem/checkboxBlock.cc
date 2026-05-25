@@ -28,6 +28,8 @@ QString CheckboxBlock::typeName()const{
 	return "checkboxBlock";
 }
 QJsonObject CheckboxBlock::blockToJson()const{
-	return QJsonObject({
-		{"type",typeName()},{"state",m_checkState}, {"text",text()}});
+	QJsonObject content;
+	content["text"]=text();
+	content["state"]=m_checkState;
+	return Block::prepToJson(content);
 }

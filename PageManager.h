@@ -10,8 +10,7 @@ struct Page{
 	Q_PROPERTY (PageModel* model MEMBER model);
 public:
 	PageData data;
-	PageModel *model;
-	int id;
+	PageModel *model = new PageModel;
 };
 Q_DECLARE_METATYPE(Page)
 
@@ -20,7 +19,7 @@ class PageManager: public QObject{
 private:
 	QVector<Page> pagesList;
 	FileModel *fileModel;
-	PageData currentPage;
+	Page currentPage;
 public:
 	// explicit PageManager (QObject *parent = nullptr) : QObject(parent){}
 	PageManager();
@@ -29,4 +28,5 @@ public:
 	void setCurrentPage(Page);
 	Q_INVOKABLE	Page getCurrentPage();
 	Page* getPageById(int id=0);
+	Q_INVOKABLE void savePagesList();
 };

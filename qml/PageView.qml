@@ -5,6 +5,7 @@ pragma ComponentBehavior: Bound
 Item{
 	id: root
 	required property var pageModel
+	required property var page
 	// property var ctrl
 	//WARNING: pageModel is null after  setRootpage	
 	
@@ -100,7 +101,7 @@ Item{
 				TextField{
 					id: pageTitle
 					// TODO:
-					// text: root.pageModel.pageName
+					text: page.p_data.id
 					placeholderText: "Unnamed"
 					width:parent.width
 					font.pixelSize: 22

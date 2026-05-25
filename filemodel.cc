@@ -32,10 +32,7 @@ void FileModel::writeFile(const QString &url,const QString input){
 	}
 }
 //new sqlite operators
-	//TODO: open sqlite db and parse it to cpp model
-	//TODO: crud for sqlite
-	//TODO: parse cpp model to PageModel
-	// ?rename PageModel to pageModel?
+//TODO: crud for sqlite
 
 
 void FileModel::openDb(){
@@ -73,7 +70,7 @@ PageData FileModel::getPageDataFromSql(int id){
 }
 QString FileModel::getPageContentFromSql(int id){
 	QSqlQuery q;
-	QString s, query="select id,content from Notes where id=?";
+	QString s, query="select id,content from Notes where id=?;";
 	q.prepare(query);
 	q.bindValue(0,id);
 	
@@ -86,4 +83,46 @@ QString FileModel::getPageContentFromSql(int id){
 	s = q.value("content").toString();
 	return s;
 
+}
+bool FileModel::idCheckInDb(int _id){
+	QSqlQuery q;
+	q.prepare("select id from Notes where id=:id limit 1;");
+	q.bindValue(":id",_id);
+	if(!q.exec()) qDebug()<<"idCheckInDb: " <<q.lastError().text();
+	if(q.next()){
+		return true;
+	}
+	return false;
+}
+bool FileModel::updateListToDb(QVector<PageData> list){
+		// TODO: update Notes set blabla=blalba where id=blabla 
+	for(auto item:list){
+		QSqlQuery q; 
+		QString query;
+		if(idCheckInDb(item.id)){
+			query="update Notes set parentId=:parentId, type=:type, content=:content where id=:id";
+			q.prepare(query);
+			q.bindValue(":id",item.id);
+			qDebug()<<"checkid true";
+		}else{
+			query="insert into Notes(parentId,type,content) values(:parentId,:type,:content)";
+			q.prepare(query);
+			qDebug()<<"checkid false";
+		}
+		int parentId= item.parentId;
+		QString type= item.type=="" ? "note" : item.type;
+		QString content= item.content;
+
+		q.bindValue(":parentId",parentId);
+		q.bindValue(":type",type);
+		//TODO: content check for injections
+		q.bindValue(":content",content);
+
+		if(!q.exec()){
+			qDebug()<<"saveListTodb error: "<<q.lastError().text();
+			return false;
+		}
+
+	}
+	return true;
 }

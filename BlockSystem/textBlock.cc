@@ -1,4 +1,5 @@
 #include "textBlock.h"
+#include "BlockSystem/block.h"
 // #include "PageModel.h"
 #include <qjsonobject.h>
 #include <qvariant.h>
@@ -16,6 +17,7 @@ QString TextBlock::typeName()const{
 	return "textBlock";
 }
 QJsonObject TextBlock::blockToJson()const{
-	return QJsonObject({
-		{"type",typeName()}, {"text",text()}});
+	QJsonObject content;
+	content["text"]=text();
+	return Block::prepToJson(content);
 }

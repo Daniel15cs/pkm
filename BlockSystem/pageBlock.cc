@@ -23,22 +23,27 @@ QString PageBlock::typeName()const{
 	return "pageBlock";
 }
 QJsonObject PageBlock::blockToJson()const{
-	QJsonDocument model = QJsonDocument::fromJson( m_model->listToJson());
-	QJsonArray array;
-		QJsonObject modelObj;
-			modelObj.insert("page",model.array());
-			array.append(modelObj);
-		QJsonObject nameObj;
-			nameObj.insert("PageName",m_pageName);
-			array.append(nameObj);
-
-	QJsonObject res;
-	res.insert("page",array);
-
-
-	qDebug()<<"res:"<<res;
-	// qDebug()<<"res:"<<res.array();
-	// qDebug()<<"doc:"<<doc;
-	// qDebug()<<"doc:"<<doc.array();
-	return res;
+	QJsonObject obj;
+	obj["pageName"]="example";
+	return prepToJson(obj);
+	// TODO: link to page with id and page name( some data for display this link)
+	
+	// QJsonDocument model = QJsonDocument::fromJson( m_model->listToJson());
+	// QJsonArray array;
+	// 	QJsonObject modelObj;
+	// 		modelObj.insert("page",model.array());
+	// 		array.append(modelObj);
+	// 	QJsonObject nameObj;
+	// 		nameObj.insert("PageName",m_pageName);
+	// 		array.append(nameObj);
+	//
+	// QJsonObject res;
+	// res.insert("page",array);
+	//
+	//
+	// qDebug()<<"res:"<<res;
+	// // qDebug()<<"res:"<<res.array();
+	// // qDebug()<<"doc:"<<doc;
+	// // qDebug()<<"doc:"<<doc.array();
+	// return res;
 }

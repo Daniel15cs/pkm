@@ -23,27 +23,27 @@ ApplicationWindow {
 		title: "Confirm"
 		informativeText:"Are you sure to clean current page?"
 		buttons: MessageDialog.Ok | MessageDialog.Cancel
-		onAccepted:{ dial.open() }
+		onAccepted:{p_pageManager.uploadList()}
 	}
-	FileDialog{
-		id:dial
-		fileMode: FileDialog.OpenFile	
-		onAccepted: {
-			pathText.text = selectedFile
-			fileModel.selectedFilePath = selectedFile
-
-			// controller.p_rootPage.pageModel.parseJson(fileModel.readFile(selectedFile))
-		}
-	}
-	FileDialog{
-		id:saveDial
-		fileMode: FileDialog.SaveFile	
-		onAccepted: {
-			// TODO: move this to pagesManager
-			// fileModel.selectedFilePath = selectedFile
-			// fileModel.writeFile(selectedFile, controller.p_rootPage.pageModel.listToJson());
-		}
-	}
+	// FileDialog{
+	// 	id:dial
+	// 	fileMode: FileDialog.OpenFile	
+	// 	onAccepted: {
+	// 		pathText.text = selectedFile
+	// 		fileModel.selectedFilePath = selectedFile
+	//
+	// 		// controller.p_rootPage.pageModel.parseJson(fileModel.readFile(selectedFile))
+	// 	}
+	// }
+	// FileDialog{
+	// 	id:saveDial
+	// 	fileMode: FileDialog.SaveFile	
+	// 	onAccepted: {
+	// 		// TODO: move this to pagesManager
+	// 		// fileModel.selectedFilePath = selectedFile
+	// 		// fileModel.writeFile(selectedFile, controller.p_rootPage.pageModel.listToJson());
+	// 	}
+	// }
 	Rectangle{
 		id: menuRect
 		color:"grey"
@@ -59,12 +59,12 @@ ApplicationWindow {
 				text: "Path"
 			}
 			Button{
-				text:"Open"
+				text:"Upload"
 				onClicked: {
 					//TODO:
-					if(controller.p_rootPage.pageModel.rowCount()>0)
+					if(p_pageManager.getCurrentPage().model.rowCount()>0)
 						clearConfirm.open()
-					else dial.open()
+					else p_pageManager.uploadList()
 				}
 			}
 			Button{
@@ -81,6 +81,7 @@ ApplicationWindow {
 					
 					// something like this:
 					// p_pageManager.save()
+					p_pageManager.savePagesList()
 				}
 			}
 			Button{
@@ -107,10 +108,10 @@ ApplicationWindow {
 			// pageLoader.item.pageModel = controller.p_rootPage
 			var currPage = p_pageManager.getCurrentPage();
 			var model = currPage.model;
-			console.log("curpage:" +currPage)
-			console.log("pdata: " +currPage.p_data)
-			console.log("id:" +currPage.p_data.id)
-			console.log("model: " +model);
+			// console.log("curpage:" +currPage)
+			// console.log("pdata: " +currPage.p_data)
+			// console.log("id:" +currPage.p_data.id)
+			// console.log("model: " +model);
 		}
 	}
 	Component{
@@ -121,6 +122,7 @@ ApplicationWindow {
 			// pageModel: controller.p_rootPage
 			// ctrl:controller
 			pageModel: p_pageManager.getCurrentPage().model
+			page: p_pageManager.getCurrentPage()
 			// Component.onCompleted:{
 			// 	pageItem.pageModel = rootPage
 			// }

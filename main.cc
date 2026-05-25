@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 	// controller->setRootPage(rootPage);
 
 	// qmlRegisterType<PageBlock>("myPageBlock",1,0,"PageBlock");
-	qmlRegisterType<Page>("myPage",1,0,"Page");
+	qmlRegisterType<Page>("myPage",1,0,"page");
 	
 	QQmlEngine::setObjectOwnership(pageManager, QQmlEngine::CppOwnership); 
 	// QQmlEngine::setObjectOwnership(rootmodel, QQmlEngine::CppOwnership); 

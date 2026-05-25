@@ -130,21 +130,29 @@ void PageModel::removeRow(const int index){
 
 QByteArray PageModel::listToJson(){
 	QJsonArray array;
-  QJsonObject obj;
 
-	obj.insert("PageName","PKM_03");
-	array.append(obj);
+  QJsonObject obj;
+	// obj.insert("PageName","PKM_03");
+	// array.append(obj);
 
 	for(auto item:blockList){
 			array.append(item->blockToJson());
 	}
-	QJsonDocument doc(array);
-	return doc.toJson(QJsonDocument::Indented);
+
+	obj["blockList"]=array;
+
+	QJsonDocument doc(obj);
+	QByteArray res = doc.toJson(QJsonDocument::Compact);
+	qDebug()<<"res: "<<res;
+	return res;
 }
 
 void PageModel::parseJson(QByteArray input){
-	QJsonArray array = QJsonDocument::fromJson(input).array();
-	qDebug()<<"array: "<<array;
+	QJsonDocument doc = QJsonDocument::fromJson(input);
+	QJsonArray array;
+	if(doc["blockList"].isArray())
+		array= doc["blockList"].toArray();
+	// qDebug()<<"array: "<<array;
 	int r = rowCount();
 
 	this->beginRemoveRows(QModelIndex(),0,r);
@@ -152,40 +160,40 @@ void PageModel::parseJson(QByteArray input){
 	this->endRemoveRows();
 	emit dataChanged(index(0,0), index(r,0), {Qt::EditRole});
 
-	qDebug()<<"after clear: "<<rowCount();
+	// qDebug()<<"after clear: "<<rowCount();
 
 	for(auto item: array){
 		auto obj = item.toObject();
-		QString blockType;
-		qDebug()<<"obj: "<< obj;
 
+		// qDebug()<<"obj: "<< obj;
 		if(!obj.contains("type"))
 			continue;
 
-		blockType = obj.value("type").toString();
-		qDebug()<<"type: "<<blockType;
+		QString blockType = obj["type"].toString();
+		// qDebug()<<"type: "<<blockType;
 
 		Block *b;
+		QJsonObject content = obj["content"].toObject();
 		if(blockType=="textBlock"){
 			TextBlock *tb = new TextBlock(this);
-			tb->textChanged(obj.value("text").toString());
+			tb->textChanged(content["text"].toString());
 			b=tb;
-			qDebug()<<"text: "<<tb->text();
+			// qDebug()<<"text: "<<tb->text();
 
 		}else if(blockType=="checkboxBlock"){
 			CheckboxBlock *cb = new CheckboxBlock(this);
-			cb->textChanged(obj.value("text").toString());
-			cb->stateChanged(obj.value("state"));
-			qDebug()<<"statejson:" <<obj.value("state");
+			cb->textChanged(content["text"].toString());
+			cb->stateChanged(content["state"].toVariant());
+			// qDebug()<<"statejson:" <<content["state"].toVariant();
 			b=cb;
 		}else{
 			return;
 		}
-		
+
 		int rc = rowCount();
 		this->beginInsertRows(QModelIndex(),rc,rc);
 		blockList.append(b);
-		qDebug()<<"append";
+		// qDebug()<<"append";
 		this->endInsertRows();
 		emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
 		// delete(b);
