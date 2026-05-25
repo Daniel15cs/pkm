@@ -106,10 +106,11 @@ ApplicationWindow {
 			// pageLoader.item.ctrl = controller
 			// pageLoader.item.pageModel = controller.p_rootPage
 			var currPage = p_pageManager.getCurrentPage();
-			console.log(typeof currPage)
-			console.log(currPage)
-			console.log(currPage.data)
-			console.log("id:" +currPage.data.id)
+			var model = currPage.model;
+			console.log("curpage:" +currPage)
+			console.log("pdata: " +currPage.p_data)
+			console.log("id:" +currPage.p_data.id)
+			console.log("model: " +model);
 		}
 	}
 	Component{

@@ -15,19 +15,21 @@
 
 // #include <QtQml>
 
-// class PageData: QObject{
-// 	Q_OBJECT
 struct PageData{
+Q_GADGET
 public:
+	Q_PROPERTY(int id MEMBER id)
+	Q_PROPERTY(int parentId MEMBER parentId)
+	Q_PROPERTY(QString type MEMBER type)
 	int id, parentId;
 	QString type;
-	// PageData (QObject *parent = nullptr, int id=0, int parentId=-1, QString type="note") : QObject(parent){}
-	
+	bool operator==(const PageData&)const =default;
+	QML_VALUE_TYPE(pageData)
+};
+Q_DECLARE_METATYPE(PageData)
 	// QString content;
 	//properties
 	//childList maybe?
-};
-// Q_DECLARE_METATYPE(PageData)
 
 class FileModel : public QObject{
 	Q_OBJECT

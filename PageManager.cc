@@ -13,7 +13,6 @@ void PageManager::uploadList(){
 	for(auto item : fileModel->getPagesListFromSql()){
 		PageModel *pm = new PageModel(this);
 		pm->parseJson(fileModel->getPageContentFromSql(item.id));
-		// Page *p = new Page(this,item,pm);
 		Page p = {item,pm};
 		if(listIsEmpty){
 			this->pagesList.append(p);
@@ -47,6 +46,5 @@ Page PageManager::getCurrentPage(){
 			return item;
 		}
 	}
-	// return pagesList.at(currentPage.id-1);
 	return Page();
 }

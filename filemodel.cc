@@ -63,7 +63,6 @@ QVector<PageData> FileModel::getPagesListFromSql(){
 			int parentId = q.value("parentId").toInt();
 			QString type = q.value("type").toString();
 
-			// PageData n = PageData(this, id,parentId,type);
 			PageData n = {id,parentId,type};
 			notesList.append(n);
 		}
