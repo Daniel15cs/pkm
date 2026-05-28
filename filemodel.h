@@ -18,15 +18,17 @@
 
 struct PageData{
 Q_GADGET
+QML_ELEMENT
 public:
 	Q_PROPERTY(int id MEMBER id)
 	Q_PROPERTY(int parentId MEMBER parentId)
 	Q_PROPERTY(QString type MEMBER type)
-	int id, parentId=-1;
+	int id=1, parentId=-1;
 	QString type="note";
 	QByteArray content;
 	bool operator==(const PageData&)const =default;
 	QML_VALUE_TYPE(pageData)
+	
 };
 Q_DECLARE_METATYPE(PageData)
 	//properties

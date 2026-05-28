@@ -12,12 +12,6 @@ ApplicationWindow {
 	color: "black"
 	// onActiveFocusItemChanged: print(activeFocusItem)
 
-	// TODO: move this to pagesManager
-	// FileModel{
-	// id:fileModel
-	// 	property string selectedFilePath
-	// }
-
 	MessageDialog{
 		id:clearConfirm
 		title: "Confirm"
@@ -25,25 +19,6 @@ ApplicationWindow {
 		buttons: MessageDialog.Ok | MessageDialog.Cancel
 		onAccepted:{p_pageManager.uploadList()}
 	}
-	// FileDialog{
-	// 	id:dial
-	// 	fileMode: FileDialog.OpenFile	
-	// 	onAccepted: {
-	// 		pathText.text = selectedFile
-	// 		fileModel.selectedFilePath = selectedFile
-	//
-	// 		// controller.p_rootPage.pageModel.parseJson(fileModel.readFile(selectedFile))
-	// 	}
-	// }
-	// FileDialog{
-	// 	id:saveDial
-	// 	fileMode: FileDialog.SaveFile	
-	// 	onAccepted: {
-	// 		// TODO: move this to pagesManager
-	// 		// fileModel.selectedFilePath = selectedFile
-	// 		// fileModel.writeFile(selectedFile, controller.p_rootPage.pageModel.listToJson());
-	// 	}
-	// }
 	Rectangle{
 		id: menuRect
 		color:"grey"
@@ -61,8 +36,7 @@ ApplicationWindow {
 			Button{
 				text:"Upload"
 				onClicked: {
-					//TODO:
-					if(p_pageManager.getCurrentPage().model.rowCount()>0)
+					if(p_pageManager.p_currentPage.model.rowCount()>0)
 						clearConfirm.open()
 					else p_pageManager.uploadList()
 				}
@@ -71,27 +45,13 @@ ApplicationWindow {
 				id: saveBtn
 				text: "Save"
 				onClicked:{
-					// TODO: change way how it saving 
-					// if (fileModel.selectedFilePath!="") {
-					// 	fileModel.writeFile(fileModel.selectedFilePath, controller.p_rootPage.pageModel.listToJson());
-					// }else{
-					// 	saveDial.fileMode = FileDialog.SaveFile
-					// 	saveDial.open()
-					// }
-					
-					// something like this:
-					// p_pageManager.save()
 					p_pageManager.savePagesList()
 				}
 			}
 			Button{
 				text:"Go back"
 				onPressed:{
-					// pageLoader.sourceComponent = pageItemdel
-					// TODO:  change controller to manager
-					// controller.getToOldPage()
-
-					// p_pageManager.getToLastPage()
+					p_pageManager.getToLastPage()
 				}
 			}
 		}
@@ -106,7 +66,7 @@ ApplicationWindow {
 		onLoaded:{
 			// pageLoader.item.ctrl = controller
 			// pageLoader.item.pageModel = controller.p_rootPage
-			var currPage = p_pageManager.getCurrentPage();
+			var currPage = p_pageManager.p_currentPage;
 			var model = currPage.model;
 			// console.log("curpage:" +currPage)
 			// console.log("pdata: " +currPage.p_data)
@@ -121,8 +81,9 @@ ApplicationWindow {
 			//TODO: change way to setting up page (from manager)
 			// pageModel: controller.p_rootPage
 			// ctrl:controller
-			pageModel: p_pageManager.getCurrentPage().model
-			page: p_pageManager.getCurrentPage()
+			pageModel: p_pageManager.p_currentPage.model
+			page: p_pageManager.p_currentPage
+			pageManager: p_pageManager
 			// Component.onCompleted:{
 			// 	pageItem.pageModel = rootPage
 			// }

@@ -35,6 +35,7 @@ qt_add_qml_module(appPKM_03_qml
 				filemodel.h filemodel.cc
 				rootModelController.h rootModelController.cc
 				PageManager.cc PageManager.h
+				QML_FILES qml/toggleItem.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

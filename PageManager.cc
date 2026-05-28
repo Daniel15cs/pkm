@@ -1,5 +1,6 @@
 #include "PageManager.h"
 #include "filemodel.h"
+#include <filesystem>
 #include <qcontainerfwd.h>
 #include <qdebug.h>
 #include <qlogging.h>
@@ -7,12 +8,37 @@
 void PageManager::setFileModel(FileModel *fm){
 	this->fileModel = fm;
 }
+
+int PageManager::appendPageToList(int parentId){
+	PageData *pd = new PageData();
+	pd->id=pagesList.length()+1;
+	pd->parentId= parentId;
+	PageModel  *pm =new PageModel(this);
+	qDebug()<<"PManager::appendPageToList()PD: id"<<pd->id<<" pid: "<<pd->parentId;
+	pm->setPageData(pd);
+	pm->callback = [&](int parentId)->int{
+		qDebug()<<"PManager::callback parentId: "<<parentId;
+		return this->appendPageToList(parentId);
+	};
+	// qDebug()<<"PManager::appendPageToList()PModel: id" << pm->getPageData()->id << " pid: " << pm->getPageData()->parentId;
+	Page p = {*pd,pm};
+	this->pagesList.append(p);
+	return pd->id;
+}
 void PageManager::uploadList(){ // parse from raw sqlite data to model
 	// QVector<PageData> pagelist = 	
 	bool listIsEmpty = this->pagesList.isEmpty();
-	for(auto item : fileModel->getPagesListFromSql()){
+	for(PageData item : fileModel->getPagesListFromSql()){
 		PageModel *pm = new PageModel(this);
+		
+		// qDebug()<<"PManager::uploadList(): id"<<item.id;
+		pm->setPageData(&item);
 		pm->parseJson(fileModel->getPageContentFromSql(item.id));
+		pm->callback = [&](int parentId)->int{
+			qDebug()<<"PManager::callback parentId: "<<parentId;
+			return this->appendPageToList(parentId);
+		};
+		qDebug()<<"Pmanager::upload list(): pm->id :"<<pm->getPageData()->id;
 		Page p = {item,pm};
 		if(listIsEmpty){
 			this->pagesList.append(p);
@@ -22,6 +48,7 @@ void PageManager::uploadList(){ // parse from raw sqlite data to model
 			//update link to model in UI
 			this->pagesList.append(p);
 		}
+		setCurrentPage(1);
 	}
 }
 PageManager::PageManager(){
@@ -44,6 +71,18 @@ PageManager::PageManager(){
 		// pagesList.append(Page());
 		// currentPage = pagesList[0];
 }
+void PageManager::setCurrentPage(int id){
+	//TODO: signal 
+		lastPage = currentPage;
+		for(auto item:pagesList) {
+			if(item.data.id==id){
+				currentPage=item;
+				emit currPageChanged(currentPage);
+				qDebug()<<"setCurrentPage id: "<<id;
+			}
+		}
+		// currentPage = pagesList.at(id);
+}
 
 Page PageManager::getCurrentPage(){
 	for(auto item: pagesList){
@@ -53,6 +92,10 @@ Page PageManager::getCurrentPage(){
 		}
 	}
 	return Page();
+}
+void PageManager::getToLastPage(){
+	// setCurrentPage(lastPage.data.id);
+	setCurrentPage(currentPage.data.parentId);
 }
 void PageManager::savePagesList(){
 	QVector<PageData> pdList;

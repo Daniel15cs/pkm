@@ -2,20 +2,19 @@
 #include "PageModel.h"
 #include <qjsondocument.h>
 #include <qjsonobject.h>
-PageBlock::PageBlock() :Block(this), m_model(new PageModel(this)){
-
-	m_pageName = "inline page";
+PageBlock::PageBlock() :Block(this){
+	// m_pageName = "inline page";
 }
-QString PageBlock::getPageName(){
-	return m_pageName;
-}
-void PageBlock::setPageName(QString _value){
-	m_pageName = _value;
-	emit pageNameChanged(m_pageName);
-}
-QPointer<PageModel> PageBlock::model()const{
-	return m_model;
-}
+// QString PageBlock::getPageName(){
+// 	// return m_pageName;
+// }
+// void PageBlock::setPageName(QString _value){
+	// m_pageName = _value;
+	// emit pageNameChanged(m_pageName);
+// }
+// QPointer<PageModel> PageBlock::model()const{
+// 	// return m_model;
+// }
 QVariant PageBlock::getData()const{
 	return QVariant();
 }
@@ -46,4 +45,10 @@ QJsonObject PageBlock::blockToJson()const{
 	// // qDebug()<<"doc:"<<doc;
 	// // qDebug()<<"doc:"<<doc.array();
 	// return res;
+}
+void PageBlock::setPageId(int id){
+	pageId = id;
+}
+int PageBlock::getPageId(){
+	return pageId;
 }

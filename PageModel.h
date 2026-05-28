@@ -1,5 +1,6 @@
 #ifndef PAGEMODEL_H
 #define PAGEMODEL_H
+#pragma once
 
 #include <QString>
 #include <QtQml>
@@ -14,11 +15,13 @@
 #include "BlockSystem/block.h"
 #include "BlockSystem/textBlock.h"
 #include "BlockSystem/checkboxBlock.h"
-#pragma once
+#include "filemodel.h"
+
 
 class PageModel : public QAbstractListModel{
 	Q_OBJECT
 	QML_ELEMENT
+	Q_PROPERTY(PageData* p_pageData READ getPageData CONSTANT)
 	enum ListRoles{
 		LogicBlockRole = Qt::UserRole+1,
 	};
@@ -40,11 +43,15 @@ public:
 	Q_INVOKABLE void parseJson(QByteArray);
 	Q_INVOKABLE void parseJson(QString);
 	Q_INVOKABLE QVariant getLogic(const int _index);
-	//
+
+	Q_INVOKABLE PageData* getPageData();
+	void setPageData(PageData*);
+	std::function<int(int)> callback;
 	// Q_INVOKABLE QVariant displayData(const QModelIndex &index);
 	// void setModelData(const QStringList& data);
 private:
 	QVector<Block*> blockList;
+	PageData* pageData;
 };
 
 #endif

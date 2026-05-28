@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
 
 	// qmlRegisterType<PageBlock>("myPageBlock",1,0,"PageBlock");
 	qmlRegisterType<Page>("myPage",1,0,"page");
+	qmlRegisterType<PageData>("myPage",1,0,"pageData");
 	
 	QQmlEngine::setObjectOwnership(pageManager, QQmlEngine::CppOwnership); 
 	// QQmlEngine::setObjectOwnership(rootmodel, QQmlEngine::CppOwnership); 

@@ -16,17 +16,23 @@ Q_DECLARE_METATYPE(Page)
 
 class PageManager: public QObject{
 	Q_OBJECT
+	Q_PROPERTY(Page p_currentPage READ getCurrentPage NOTIFY currPageChanged)
 private:
 	QVector<Page> pagesList;
 	FileModel *fileModel;
-	Page currentPage;
+	Page currentPage,lastPage;
 public:
 	// explicit PageManager (QObject *parent = nullptr) : QObject(parent){}
 	PageManager();
 	Q_INVOKABLE void setFileModel(FileModel*);
 	Q_INVOKABLE void uploadList();
-	void setCurrentPage(Page);
+	Q_INVOKABLE void setCurrentPage(int id=0);
 	Q_INVOKABLE	Page getCurrentPage();
 	Page* getPageById(int id=0);
 	Q_INVOKABLE void savePagesList();
+	Q_INVOKABLE void getToLastPage();
+	Q_INVOKABLE int appendPageToList(int parentId=0);
+
+signals:
+	void currPageChanged(Page);
 };

@@ -89,10 +89,10 @@ Item{
 			width:25
 			visible:hover.hovered
 
-			background: Rectangle {
-				opacity: enabled ? 1 : 0.3
-				color:"black" 
-			}
+			// background: Rectangle {
+			// 	opacity: enabled ? 1 : 0.3
+			// 	color:"black" 
+			// }
 			onClicked:{
 				if (baseItem.index>=0)
 					baseItem.model.removeRow(baseItem.index);

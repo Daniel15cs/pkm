@@ -1,7 +1,6 @@
 // #include <filesystem>
 #include "BlockSystem/checkboxBlock.h"
 #include "BlockSystem/pageBlock.h"
-#include "PageManager.h"
 #include <PageModel.h>
 
 #include <qabstractitemmodel.h>
@@ -86,7 +85,12 @@ bool PageModel::append(QVariant blockType){
 	if (blockType.toString()=="checkboxBlock"){
 		b = new CheckboxBlock(this);
 	}else if(blockType.toString()=="pageBlock"){
-		b = new PageBlock(this);
+		//TODO: append new page into pagelist
+		int id = callback(this->getPageData()->id);
+		qDebug()<<"PModel::callback id:"<<id<<"Pdata->id: "<<this->getPageData()->id;
+		PageBlock *pb = new PageBlock(this);
+		pb->setPageId(id);
+		b = pb;
 	}
 	else{
 		b = new TextBlock(this);
@@ -130,7 +134,6 @@ void PageModel::removeRow(const int index){
 
 QByteArray PageModel::listToJson(){
 	QJsonArray array;
-
   QJsonObject obj;
 	// obj.insert("PageName","PKM_03");
 	// array.append(obj);
@@ -138,7 +141,6 @@ QByteArray PageModel::listToJson(){
 	for(auto item:blockList){
 			array.append(item->blockToJson());
 	}
-
 	obj["blockList"]=array;
 
 	QJsonDocument doc(obj);
@@ -159,16 +161,13 @@ void PageModel::parseJson(QByteArray input){
 	blockList.clear();
 	this->endRemoveRows();
 	emit dataChanged(index(0,0), index(r,0), {Qt::EditRole});
-
 	// qDebug()<<"after clear: "<<rowCount();
 
 	for(auto item: array){
 		auto obj = item.toObject();
-
 		// qDebug()<<"obj: "<< obj;
 		if(!obj.contains("type"))
 			continue;
-
 		QString blockType = obj["type"].toString();
 		// qDebug()<<"type: "<<blockType;
 
@@ -179,7 +178,6 @@ void PageModel::parseJson(QByteArray input){
 			tb->textChanged(content["text"].toString());
 			b=tb;
 			// qDebug()<<"text: "<<tb->text();
-
 		}else if(blockType=="checkboxBlock"){
 			CheckboxBlock *cb = new CheckboxBlock(this);
 			cb->textChanged(content["text"].toString());
@@ -189,7 +187,6 @@ void PageModel::parseJson(QByteArray input){
 		}else{
 			return;
 		}
-
 		int rc = rowCount();
 		this->beginInsertRows(QModelIndex(),rc,rc);
 		blockList.append(b);
@@ -198,13 +195,26 @@ void PageModel::parseJson(QByteArray input){
 		emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
 		// delete(b);
 	}
-	qDebug()<<"parse";
-
+	// qDebug()<<"parse";
 }
+
 void PageModel::parseJson(QString input){
 	PageModel::parseJson(input.toUtf8());
 }
+
 QVariant PageModel::getLogic(const int _index){
 	QModelIndex in = index(_index,0);
 	return data(in,LogicBlockRole);
+}
+
+PageData* PageModel::getPageData(){
+	// qDebug()<<"getPageData: id: "<<this->pageData->id;
+	// PageData *pd = pageData;
+	qDebug()<<"PModel::getPageData pd.id: "<<pageData->id<<" pid: "<<pageData->parentId;
+	return pageData;
+}
+
+void PageModel::setPageData(PageData* pd){
+	pageData = pd;
+	qDebug()<<"PModel::setPageData: id"<<pd->id <<" pid:" <<pd->parentId;
 }

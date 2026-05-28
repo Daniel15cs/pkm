@@ -6,6 +6,7 @@ Item{
 	id: root
 	required property var pageModel
 	required property var page
+	required property var pageManager
 	// property var ctrl
 	//WARNING: pageModel is null after  setRootpage	
 	
@@ -30,8 +31,9 @@ Item{
 
 			onCurrentIndexChanged:{
 				// console.log("currind: "+currentIndex)
-				if(currentItem)
+				if(currentItem){
 					currentItem._loader.item.onCurrent()
+				}
 			}
 
 			Keys.onUpPressed: decrementCurrentIndex()
@@ -83,8 +85,8 @@ Item{
 						model:listGrid.model
 						_width: flickable.width
 						index: delItem.index
-						//TODO:
-						// controller:root.ctrl
+						pageManager: root.pageManager
+
 						
 						// listView: listGrid
 						// pageLoader: root.loader
@@ -159,6 +161,8 @@ Item{
 							}
 							Action{ text :"Page"
 								onTriggered:{
+									// TODO: proper page append AND block to this pageModel
+									// root.pageManager.appendPageToList(root.pageModel.getPageData.id)
 									listGrid.model.append("pageBlock")
 									listGrid.currentIndex = listGrid.model.rowCount()-1
 								}
