@@ -13,8 +13,8 @@ public:
 	Q_INVOKABLE int checkState()const;
 	QVariant getData() const override;
 	QString typeName()const override;
-	Q_INVOKABLE void textChanged(const QString &newText);
-	Q_INVOKABLE void stateChanged(const QVariant state);
+	Q_INVOKABLE void setText(const QString &newText);
+	Q_INVOKABLE void setState(const QVariant state);
 	QJsonObject blockToJson()const override;
 private:
 	QString m_text;

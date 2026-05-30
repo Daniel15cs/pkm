@@ -1,7 +1,9 @@
 #include <qlogging.h>
 #include <qsqlquery.h>
+#include <qstringview.h>
 #include <qtmetamacros.h>
 #include "filemodel.h"
+#include "PageManager.h"
 
 #include <QDebug>
 #include <QUrl>
@@ -35,17 +37,19 @@ void FileModel::writeFile(const QString &url,const QString input){
 //TODO: crud for sqlite
 
 
-void FileModel::openDb(){
-	QDir dir;
-	QString _dbPath = dir.currentPath()+"/../../pkm.db";
+bool FileModel::openDb(QString path){
+
 	db = QSqlDatabase::addDatabase("QSQLITE");
-	if (_dbPath==""){
+	if (path==""){
 		qDebug()<<"opendb error: dbPath is null";
-		return;
+		return false;
 	}
-	db.setDatabaseName(_dbPath);
-		if(!db.open()) 
-			qDebug()<<"db error: "<< db.lastError().text();
+	db.setDatabaseName(path);
+	if(!db.open()) {
+		qDebug()<<"db error: "<< db.lastError().text();
+		return false;
+	}
+	return true;
 }
 QVector<PageData> FileModel::getPagesListFromSql(){
 		QSqlQuery q;
@@ -66,7 +70,26 @@ QVector<PageData> FileModel::getPagesListFromSql(){
 	return notesList;
 }
 PageData FileModel::getPageDataFromSql(int id){
-	return PageData();
+	QSqlQuery q(this->db);
+	QString query="select id, parentId, type,content from Notes where id=:id";
+
+	q.prepare(query);
+	q.bindValue(0,id);
+	
+	if(!q.exec()){
+		qDebug()<<"getPageContent error"<<q.lastError().text();
+		return PageData();
+	}else {
+		q.next();
+	}
+	int parentId;
+	QString type;
+	QByteArray content;
+	parentId = q.value("parentId").toInt();
+	content = q.value("content").toByteArray();
+	type = q.value("type").toString();
+	PageData pd{id, parentId, type, content};
+	return pd;
 }
 QString FileModel::getPageContentFromSql(int id){
 	QSqlQuery q;
@@ -111,7 +134,7 @@ bool FileModel::updateListToDb(QVector<PageData> list){
 		}
 		int parentId= item.parentId;
 		QString type= item.type=="" ? "note" : item.type;
-		QString content= item.content;
+		QByteArray content= item.content;
 
 		q.bindValue(":parentId",parentId);
 		q.bindValue(":type",type);

@@ -2,19 +2,6 @@
 #include "PageModel.h"
 #include <qjsondocument.h>
 #include <qjsonobject.h>
-PageBlock::PageBlock() :Block(this){
-	// m_pageName = "inline page";
-}
-// QString PageBlock::getPageName(){
-// 	// return m_pageName;
-// }
-// void PageBlock::setPageName(QString _value){
-	// m_pageName = _value;
-	// emit pageNameChanged(m_pageName);
-// }
-// QPointer<PageModel> PageBlock::model()const{
-// 	// return m_model;
-// }
 QVariant PageBlock::getData()const{
 	return QVariant();
 }
@@ -23,32 +10,12 @@ QString PageBlock::typeName()const{
 }
 QJsonObject PageBlock::blockToJson()const{
 	QJsonObject obj;
-	obj["pageName"]="example";
+	obj["id"]=pageId;
 	return prepToJson(obj);
-	// TODO: link to page with id and page name( some data for display this link)
-	
-	// QJsonDocument model = QJsonDocument::fromJson( m_model->listToJson());
-	// QJsonArray array;
-	// 	QJsonObject modelObj;
-	// 		modelObj.insert("page",model.array());
-	// 		array.append(modelObj);
-	// 	QJsonObject nameObj;
-	// 		nameObj.insert("PageName",m_pageName);
-	// 		array.append(nameObj);
-	//
-	// QJsonObject res;
-	// res.insert("page",array);
-	//
-	//
-	// qDebug()<<"res:"<<res;
-	// // qDebug()<<"res:"<<res.array();
-	// // qDebug()<<"doc:"<<doc;
-	// // qDebug()<<"doc:"<<doc.array();
-	// return res;
 }
 void PageBlock::setPageId(int id){
 	pageId = id;
 }
-int PageBlock::getPageId(){
+int PageBlock::getPageId()const{
 	return pageId;
 }

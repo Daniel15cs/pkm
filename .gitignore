@@ -1,7 +1,8 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 .cache/
-
+Testing/*
+tests/Testing/*
 pkm.db*
 *.db*
 *~

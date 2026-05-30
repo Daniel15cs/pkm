@@ -51,8 +51,9 @@ void PageManager::uploadList(){ // parse from raw sqlite data to model
 		setCurrentPage(1);
 	}
 }
-PageManager::PageManager(){
+PageManager::PageManager(FileModel* fm){
 	// fileModel->openDb();
+	fileModel =fm;
 	this->uploadList();
 //debug for input raw data
 	// for(auto item:pagesList){
