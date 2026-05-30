@@ -67,7 +67,7 @@ bool PageModel::append(Block *b){
 	this->endInsertRows();
 
 	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
-	return false;
+	return true;
 } 
 bool PageModel::append(){
 	int rc = rowCount();
@@ -155,7 +155,7 @@ void PageModel::parseJson(QByteArray input){
 	if(doc["blockList"].isArray())
 		array= doc["blockList"].toArray();
 	// qDebug()<<"array: "<<array;
-	int r = rowCount();
+	int r = rowCount()-1;
 
 	this->beginRemoveRows(QModelIndex(),0,r);
 	blockList.clear();
@@ -184,7 +184,10 @@ void PageModel::parseJson(QByteArray input){
 			cb->setState(content["state"].toVariant());
 			// qDebug()<<"statejson:" <<content["state"].toVariant();
 			b=cb;
-		}else{
+		}else if(blockType=="pageBlock"){
+			//TODO: add pageBlock parsing
+		}
+		else{
 			return;
 		}
 		int rc = rowCount();

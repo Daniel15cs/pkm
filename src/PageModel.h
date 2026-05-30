@@ -51,7 +51,7 @@ public:
 	// void setModelData(const QStringList& data);
 private:
 	QVector<Block*> blockList;
-	PageData* pageData;
+	PageData *pageData;
 };
 
 #endif
