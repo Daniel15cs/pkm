@@ -1,6 +1,7 @@
 // #include <filesystem>
 #include "BlockSystem/checkboxBlock.h"
 #include "BlockSystem/pageBlock.h"
+#include "PageManager.h"
 #include <PageModel.h>
 
 #include <qabstractitemmodel.h>
@@ -67,7 +68,7 @@ bool PageModel::append(Block *b){
 	this->endInsertRows();
 
 	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
-	return false;
+	return true;
 } 
 bool PageModel::append(){
 	int rc = rowCount();
@@ -85,9 +86,14 @@ bool PageModel::append(QVariant blockType){
 	if (blockType.toString()=="checkboxBlock"){
 		b = new CheckboxBlock(this);
 	}else if(blockType.toString()=="pageBlock"){
-		//TODO: append new page into pagelist
-		int id = callback(this->getPageData()->id);
-		qDebug()<<"PModel::callback id:"<<id<<"Pdata->id: "<<this->getPageData()->id;
+		//TODO: error segfault
+		// append new page into pagelist
+		int id=1;
+		if(callback){
+			id = callback(getPageData()->id);
+			qDebug()<<"PModel::callback id:"<<id<<"Pdata->id: "<<getPageData()->id;
+		}
+
 		PageBlock *pb = new PageBlock(this);
 		pb->setPageId(id);
 		b = pb;
@@ -155,7 +161,7 @@ void PageModel::parseJson(QByteArray input){
 	if(doc["blockList"].isArray())
 		array= doc["blockList"].toArray();
 	// qDebug()<<"array: "<<array;
-	int r = rowCount();
+	int r = rowCount()-1;
 
 	this->beginRemoveRows(QModelIndex(),0,r);
 	blockList.clear();
@@ -184,7 +190,13 @@ void PageModel::parseJson(QByteArray input){
 			cb->setState(content["state"].toVariant());
 			// qDebug()<<"statejson:" <<content["state"].toVariant();
 			b=cb;
-		}else{
+		}else if(blockType=="pageBlock"){
+			//TODO: add pageBlock parsing
+			PageBlock * pb = new PageBlock(this);
+			pb->setPageId(content["id"].toInt());
+			b=pb;
+		}
+		else{
 			return;
 		}
 		int rc = rowCount();
@@ -210,8 +222,13 @@ QVariant PageModel::getLogic(const int _index){
 PageData* PageModel::getPageData(){
 	// qDebug()<<"getPageData: id: "<<this->pageData->id;
 	// PageData *pd = pageData;
-	qDebug()<<"PModel::getPageData pd.id: "<<pageData->id<<" pid: "<<pageData->parentId;
-	return pageData;
+	if(pageData){
+		// qDebug()<<"PModel::getPageData pd.id: "<<pageData->id<<" pid: "<<pageData->parentId;
+		return pageData;
+	}else{
+		PageData *pd = new PageData{-1,-1,"",""};
+		return pd;
+	}
 }
 
 void PageModel::setPageData(PageData* pd){

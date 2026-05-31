@@ -28,7 +28,7 @@ public:
 	Q_INVOKABLE void uploadList();
 	Q_INVOKABLE void setCurrentPage(int id=0);
 	Q_INVOKABLE	Page getCurrentPage();
-	Page* getPageById(int id=0);
+	Page getPageById(int id=0);
 	Q_INVOKABLE void savePagesList();
 	Q_INVOKABLE void getToLastPage();
 	Q_INVOKABLE int appendPageToList(int parentId=0);

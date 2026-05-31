@@ -30,15 +30,16 @@ void PageManager::uploadList(){ // parse from raw sqlite data to model
 	bool listIsEmpty = this->pagesList.isEmpty();
 	for(PageData item : fileModel->getPagesListFromSql()){
 		PageModel *pm = new PageModel(this);
-		
+		PageData *pd = new PageData(item);
 		// qDebug()<<"PManager::uploadList(): id"<<item.id;
-		pm->setPageData(&item);
+
+		pm->setPageData(pd);
 		pm->parseJson(fileModel->getPageContentFromSql(item.id));
 		pm->callback = [&](int parentId)->int{
 			qDebug()<<"PManager::callback parentId: "<<parentId;
 			return this->appendPageToList(parentId);
 		};
-		qDebug()<<"Pmanager::upload list(): pm->id :"<<pm->getPageData()->id;
+
 		Page p = {item,pm};
 		if(listIsEmpty){
 			this->pagesList.append(p);
@@ -49,7 +50,8 @@ void PageManager::uploadList(){ // parse from raw sqlite data to model
 			this->pagesList.append(p);
 		}
 		setCurrentPage(1);
-	}
+		qDebug()<<"Pmanager::upload list(): pm->id :"<<pm->getPageData()->id;
+	} 
 }
 PageManager::PageManager(FileModel* fm){
 	// fileModel->openDb();
@@ -73,7 +75,6 @@ PageManager::PageManager(FileModel* fm){
 		// currentPage = pagesList[0];
 }
 void PageManager::setCurrentPage(int id){
-	//TODO: signal 
 		lastPage = currentPage;
 		for(auto item:pagesList) {
 			if(item.data.id==id){
@@ -109,4 +110,13 @@ void PageManager::savePagesList(){
 	}
 
 	qDebug()<<"saveList: " << fileModel->updateListToDb(pdList);
+}
+
+Page PageManager::getPageById(int id){
+	for(Page item:pagesList){
+		if(item.data.id==id){
+			return item;
+		}
+	}
+	return Page();
 }

@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 	QQmlApplicationEngine engine;
 
 	QDir dir;
-	QString _dbPath = dir.currentPath()+"/../../pkm.db";
+	QString _dbPath = dir.currentPath()+"/pkm.db";
 	FileModel *fileModel = new FileModel();
 	fileModel->openDb(_dbPath);
 	
