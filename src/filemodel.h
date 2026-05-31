@@ -41,16 +41,11 @@ public:
 	explicit FileModel(QObject *parent = nullptr):QObject(parent){}
 	
 	// new sqlite operators
-	//TODO: open sqlite db and parse it to cpp model
-	//TODO: crud for sqlite
-	//TODO: parse cpp model to 
-	//
-	// QVector<PageData> pageDataList;
 	QString dbPath;
 	QSqlDatabase db;
 	QVector<PageData> getPagesListFromSql();
 
-	void openDb();
+	bool openDb(QString);
 
 	PageData getPageDataFromSql(int id);
 	QString getPageContentFromSql(int id=0);

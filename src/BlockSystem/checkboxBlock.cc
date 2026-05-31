@@ -8,10 +8,10 @@ QString CheckboxBlock::text()const{
 int CheckboxBlock::checkState()const{
 	return m_checkState;
 }
-void CheckboxBlock::textChanged(const QString &newText){
+void CheckboxBlock::setText(const QString &newText){
 	m_text = newText;
 }
-void CheckboxBlock::stateChanged(const QVariant state){
+void CheckboxBlock::setState(const QVariant state){
 	int st = state.toInt();
 	if(st==1)
 			m_checkState = 1;

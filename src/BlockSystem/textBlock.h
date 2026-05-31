@@ -10,7 +10,7 @@ public:
 	Q_INVOKABLE QString text()const;
 	QVariant getData() const override;
 	QString typeName()const override;
-	Q_INVOKABLE void textChanged(const QString &newText);
+	Q_INVOKABLE void setText(const QString &newText);
 	QJsonObject blockToJson()const override;
 private:
 	QString m_text;

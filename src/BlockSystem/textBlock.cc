@@ -6,7 +6,7 @@
 QString TextBlock::text()const{
 	return m_text;
 }
-void TextBlock::textChanged(const QString &newText){
+void TextBlock::setText(const QString &newText){
 	m_text = newText;
 }
 QVariant TextBlock::getData()const{

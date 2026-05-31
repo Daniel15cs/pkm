@@ -175,13 +175,13 @@ void PageModel::parseJson(QByteArray input){
 		QJsonObject content = obj["content"].toObject();
 		if(blockType=="textBlock"){
 			TextBlock *tb = new TextBlock(this);
-			tb->textChanged(content["text"].toString());
+			tb->setText(content["text"].toString());
 			b=tb;
 			// qDebug()<<"text: "<<tb->text();
 		}else if(blockType=="checkboxBlock"){
 			CheckboxBlock *cb = new CheckboxBlock(this);
-			cb->textChanged(content["text"].toString());
-			cb->stateChanged(content["state"].toVariant());
+			cb->setText(content["text"].toString());
+			cb->setState(content["state"].toVariant());
 			// qDebug()<<"statejson:" <<content["state"].toVariant();
 			b=cb;
 		}else{

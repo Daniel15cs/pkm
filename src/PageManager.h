@@ -23,7 +23,7 @@ private:
 	Page currentPage,lastPage;
 public:
 	// explicit PageManager (QObject *parent = nullptr) : QObject(parent){}
-	PageManager();
+	PageManager(FileModel*);
 	Q_INVOKABLE void setFileModel(FileModel*);
 	Q_INVOKABLE void uploadList();
 	Q_INVOKABLE void setCurrentPage(int id=0);
