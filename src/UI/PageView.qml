@@ -4,10 +4,9 @@ import QtQuick.Controls
 pragma ComponentBehavior: Bound
 Item{
 	id: root
-	required property var pageModel
-	required property var page
 	required property var pageManager
-	// property var ctrl
+	required property var pageModel
+	property var page: pageManager.p_currentPage
 	//WARNING: pageModel is null after  setRootpage	
 	
 	// property var pageModel: ctrl.p_rootPage
@@ -103,6 +102,7 @@ Item{
 						_width: flickable.width
 						index: delItem.index
 						listView: listGrid
+						pageManager: root.pageManager
 					}
 				}
 			}

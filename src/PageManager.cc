@@ -14,10 +14,10 @@ int PageManager::appendPageToList(int parentId){
 	pd->id=pagesList.length()+1;
 	pd->parentId= parentId;
 	PageModel  *pm =new PageModel(this);
-	qDebug()<<"PManager::appendPageToList()PD: id"<<pd->id<<" pid: "<<pd->parentId;
+	// qDebug()<<"PManager::appendPageToList()PD: id"<<pd->id<<" pid: "<<pd->parentId;
 	pm->setPageData(pd);
 	pm->callback = [&](int parentId)->int{
-		qDebug()<<"PManager::callback parentId: "<<parentId;
+		// qDebug()<<"PManager::callback parentId: "<<parentId;
 		return this->appendPageToList(parentId);
 	};
 	// qDebug()<<"PManager::appendPageToList()PModel: id" << pm->getPageData()->id << " pid: " << pm->getPageData()->parentId;
@@ -36,7 +36,7 @@ void PageManager::uploadList(){ // parse from raw sqlite data to model
 		pm->setPageData(pd);
 		pm->parseJson(fileModel->getPageContentFromSql(item.id));
 		pm->callback = [&](int parentId)->int{
-			qDebug()<<"PManager::callback parentId: "<<parentId;
+			// qDebug()<<"PManager::callback parentId: "<<parentId;
 			return this->appendPageToList(parentId);
 		};
 
@@ -50,7 +50,7 @@ void PageManager::uploadList(){ // parse from raw sqlite data to model
 			this->pagesList.append(p);
 		}
 		setCurrentPage(1);
-		qDebug()<<"Pmanager::upload list(): pm->id :"<<pm->getPageData()->id;
+		// qDebug()<<"Pmanager::upload list(): pm->id :"<<pm->getPageData()->id;
 	} 
 }
 PageManager::PageManager(FileModel* fm){
@@ -80,7 +80,7 @@ void PageManager::setCurrentPage(int id){
 			if(item.data.id==id){
 				currentPage=item;
 				emit currPageChanged(currentPage);
-				qDebug()<<"setCurrentPage id: "<<id;
+				// qDebug()<<"setCurrentPage id: "<<id;
 			}
 		}
 		// currentPage = pagesList.at(id);
@@ -105,11 +105,11 @@ void PageManager::savePagesList(){
 	for(auto item:pagesList){
 		PageData pd = item.data;
 		pd.content = item.model->listToJson();
-		qDebug()<<pd.content;
+		// qDebug()<<pd.content;
 		pdList.append(pd);
 	}
 
-	qDebug()<<"saveList: " << fileModel->updateListToDb(pdList);
+	// qDebug()<<"saveList: " << fileModel->updateListToDb(pdList);
 }
 
 Page PageManager::getPageById(int id){

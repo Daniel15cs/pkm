@@ -1,16 +1,16 @@
 #include "BlockSystem/toggleBlock.h"
 #include "BlockSystem/block.h"
+#include <qitemselectionmodel.h>
 #include <qjsonobject.h>
 
-	QVariant ToggleBlock::getData() const {
-		return QVariant();
-	}
-	QString ToggleBlock::typeName() const{
-		return "toggleBlock";
-	}
-	// void ToggleBlock::setText(const QString &newText){
-	//
-	// }
-	QJsonObject ToggleBlock::blockToJson()const {
-		return QJsonObject();
-	}
+// ToggleBlock::ToggleBlock() :Block(this), m_model(new PageModel(this)){ }
+QVariant ToggleBlock::getData() const {
+	return QVariant();
+}
+QString ToggleBlock::typeName() const{
+	return "toggleBlock";
+}
+
+QJsonObject ToggleBlock::blockToJson()const {
+	return QJsonObject();
+}

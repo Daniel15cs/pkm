@@ -2,12 +2,16 @@ import QtQuick
 import QtQuick.Controls
 Item {
 	id: root
+	required property var pageManager
 	required property var model
 	required property int index
 	required property var listView
 	property int _width:500
-
-	property bool expanded: true
+	property alias _compText:compText
+	property string _text: logicobject?.text_p
+	property bool expanded: false
+	property var logicobject: root.model.getLogic(root.index)
+	property string blockType:"toggleBlock"
 
 	readonly property int headerHeight: 25
 
@@ -16,34 +20,107 @@ Item {
 	onHeightChanged: root.listView.itemAtIndex(root.index).height = root.height
 
 	function onCurrent(){
-		tta.forceActiveFocus(Qt.TabFocusReason)
-		btn.highlighted = !btn.highlighted
+		compText.forceActiveFocus(Qt.TabFocusReason)
+		// btn.highlighted = !btn.highlighted
 	}
 	Column {
 		anchors.fill: parent
 		spacing: 4
+		Row{
+			// spacing: 4
+			Button {
+				id:btn
+				width: root.headerHeight
+				height: root.headerHeight
+				text: root.expanded ? "v" : ">"
+				onClicked:{
+					root.listView.currentIndex = root.index
+					root.onCurrent()
+					root.listView.currentItem.height = root.height
+					root.expanded = !root.expanded
+				} 
+				background: Rectangle {
+					opacity: enabled ? 1 : 0.3
+					color:"black" 
+				}
+			}
+			TextArea{
+				id: compText
+				height:root.headerHeight
+				width:root.width-50
+				verticalAlignment:TextEdit.AlignVCenter
+				persistentSelection: true
+				text: root._text
+				placeholderText: compText.activeFocus==true ? "Enter text" :""
+				implicitHeight: contentHeight
+				// wrapMode: TextArea.Wrap
+				// focus:true
 
-		Button {
-			id:btn
-			width: root.headerHeight
-			height: root.headerHeight
-			text: root.expanded ? "v" : ">"
-			onClicked:{
-				root.listView.currentIndex = root.index
-				root.onCurrent()
-				root.listView.currentItem.height = root.height
-				root.expanded = !root.expanded
-			} 
+				background: Item{
+					// anchors.fill: parent
+					// Rectangle{ anchors.fill:parent; color: "Grey"}
+				}
+				onPressed:{
+					root.listView.currentIndex = root.index
+					if(compText.activeFocus==false)
+					root.onCurrent()
+				}
+
+				onTextChanged:{
+					root.logicobject.setText(text)
+					root.listView.currentItem.height = root.height
+				}
+
+				Keys.onPressed:function(event){
+					if(event.key ===Qt.Key_Return || event.key === Qt.Key_Enter){
+						if(event.modifiers & Qt.ShiftModifier){
+							event.accepted = false
+						}if(event.modifiers & Qt.ControlModifier){
+							event.accepted = true
+							root.expanded = ! root.expanded
+						}
+						else{
+							event.accepted = true
+							if(root.index==root.model.rowCount()){
+								root.model.append(root.blockType)
+								root.listView.incrementCurrentIndex()
+							}
+							else if(root.index<root.model.rowCount()){
+								root.model.insert(root.blockType,root.index+1)
+								root.listView.incrementCurrentIndex()
+							}
+						}
+					}else if(compText.text ==="" && event.key===Qt.Key_Backspace){
+						root.model.removeRow(root.index)
+						root.listView.decrementCurrentIndex()
+					}
+				}
+			}
+
+			Button{
+				id:compBtn
+				text: "x"
+				height:25
+				width:25
+				// visible:hover.hovered
+
+				background: Rectangle {
+					opacity: enabled ? 1 : 0.3
+					color:"black" 
+				}
+				onClicked:{
+					if (root.index>=0)
+					root.model.removeRow(root.index);
+				}
+			}
 		}
 
 		Rectangle {
 			id: panel
 			width: parent.width
-			color: "blue"
+			color: "black"
 			clip: true
-
 			implicitHeight: content.implicitHeight + 10
-
 			height: root.expanded ? implicitHeight : 0
 
 			Behavior on height {

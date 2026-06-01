@@ -47,7 +47,7 @@ bool PageModel::setData(const QModelIndex &index, const QVariant &value, const i
 		int ir = index.row();
 
 		beginInsertRows(index,ir,ir);
-		qDebug()<<"setData:"<<value;
+		// qDebug()<<"setData:"<<value;
 		endInsertRows();
 
 		emit dataChanged(index, index, {role});
@@ -133,7 +133,7 @@ bool PageModel::insert(QVariant blockType, const int _index){
 void PageModel::removeRow(const int index){
 	int ir = index;
 	if(ir>=rowCount() ||ir<0){
-		qDebug()<<"index: "<<ir<<" out of range";
+		// qDebug()<<"index: "<<ir<<" out of range";
 		return;
 	}
 
@@ -155,7 +155,7 @@ QByteArray PageModel::listToJson(){
 
 	QJsonDocument doc(obj);
 	QByteArray res = doc.toJson(QJsonDocument::Compact);
-	qDebug()<<"res: "<<res;
+	// qDebug()<<"res: "<<res;
 	return res;
 }
 
@@ -237,5 +237,5 @@ PageData* PageModel::getPageData(){
 
 void PageModel::setPageData(PageData* pd){
 	pageData = pd;
-	qDebug()<<"PModel::setPageData: id"<<pd->id <<" pid:" <<pd->parentId;
+	// qDebug()<<"PModel::setPageData: id"<<pd->id <<" pid:" <<pd->parentId;
 }

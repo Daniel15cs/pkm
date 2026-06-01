@@ -78,15 +78,8 @@ ApplicationWindow {
 		id:pageItemdel
 		PageView{ 
 			id:pageItem
-			//TODO: change way to setting up page (from manager)
-			// pageModel: controller.p_rootPage
-			// ctrl:controller
-			pageModel: p_pageManager.p_currentPage.model
-			page: p_pageManager.p_currentPage
 			pageManager: p_pageManager
-			// Component.onCompleted:{
-			// 	pageItem.pageModel = rootPage
-			// }
+			pageModel: p_pageManager.p_currentPage.model
 		}
 	}
 

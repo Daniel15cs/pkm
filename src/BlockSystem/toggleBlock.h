@@ -1,17 +1,21 @@
 #include <QString>
 #include <qtmetamacros.h>
 #include "block.h"
+#include "../PageModel.h"
 #pragma once
 class ToggleBlock : public Block{
 	Q_OBJECT
-	// Q_PROPERTY (QString text_p READ text CONSTANT);
+	// Q_PROPERTY (PageModel p_model READ model CONSTANT);
 public: 
+	// ToggleBlock();
 	using Block::Block;
-	// Q_INVOKABLE QString text()const;
+	// Q_INVOKABLE PageModel model()const;
 	QVariant getData() const override;
 	QString typeName()const override;
 	// Q_INVOKABLE void setText(const QString &newText);
 	QJsonObject blockToJson()const override;
 private:
-	// QString m_text;
+	// const QPointer<PageModel> m_model = new PageModel(this);
+
+	// PageModel *m_model;
 };

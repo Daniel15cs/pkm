@@ -22,7 +22,7 @@ Item{
 		// console.log("listItem rootpage:" +root.controller.p_rootPage)
 		// console.log("listItem logic: "+pageModel)
 		// console.log("listItem model: "+root.model+"\n")
-		console.log(root.model)
+		// console.log(root.model)
 		// console.log(root.model.p_pageData)
 	}
 	MessageDialog{
@@ -43,10 +43,10 @@ Item{
 			height: root._height
 			width:root._width-25
 			onPressed:{
-				console.log(root.model)
+				// console.log(root.model)
 				// console.log("listItem rootpageold:" +root.controller.p_rootPage)
-				console.log("pageListItem page id: " +root.model.p_pageData.id)
-				console.log("pageListItem pageData: " +root.model.p_pageData)
+				// console.log("pageListItem page id: " +root.model.p_pageData.id)
+				// console.log("pageListItem pageData: " +root.model.p_pageData)
 				//TODO: page manager is undefined
 				root.pageManager.setCurrentPage(root.blockLogic.p_pageId)
 				//TODO:

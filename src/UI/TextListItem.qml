@@ -17,14 +17,14 @@ Item{
 	property int _textMargin: 25
 	property alias _compText:compText
 	property string blockType:"textBlock"
-	onHeightChanged: baseItem.listView.currentItem.height =baseItem.height
+	onHeightChanged: baseItem.listView.itemAtIndex(index).height =baseItem.height
 	// Component.onCompleted:{
 	// 	baseItem.listView.currentItem.height = baseItem._height
 	// }
 	function onCurrent(){
 			compText.forceActiveFocus(Qt.TabFocusReason)
 				//TODO:
-			// baseItem.listView.currentItem.height = baseItem.height
+			baseItem.listView.currentItem.height = baseItem.height
 	}
 
 	HoverHandler{ id:hover}
@@ -86,14 +86,14 @@ Item{
 		Button{
 			id:compBtn
 			text: "x"
-			height:baseItem._height
+			height:25
 			width:25
 			visible:hover.hovered
 
-			// background: Rectangle {
-			// 	opacity: enabled ? 1 : 0.3
-			// 	color:"black" 
-			// }
+			background: Rectangle {
+				opacity: enabled ? 1 : 0.3
+				color:"black" 
+			}
 			onClicked:{
 				if (baseItem.index>=0)
 					baseItem.model.removeRow(baseItem.index);
