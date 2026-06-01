@@ -17,13 +17,14 @@ Item{
 	property int _textMargin: 25
 	property alias _compText:compText
 	property string blockType:"textBlock"
-
+	onHeightChanged: baseItem.listView.currentItem.height =baseItem.height
 	// Component.onCompleted:{
 	// 	baseItem.listView.currentItem.height = baseItem._height
 	// }
 	function onCurrent(){
 			compText.forceActiveFocus(Qt.TabFocusReason)
-			baseItem.listView.currentItem.height = baseItem.height
+				//TODO:
+			// baseItem.listView.currentItem.height = baseItem.height
 	}
 
 	HoverHandler{ id:hover}
@@ -57,7 +58,7 @@ Item{
 			}
 
 			onTextChanged:{
-				baseItem.logicobject.textChanged(text)
+				baseItem.logicobject.setText(text)
 				baseItem.listView.currentItem.height = baseItem._height
 			}
 

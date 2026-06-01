@@ -4,6 +4,7 @@ project(PKM_03_qml VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(QT_QML_GENERATE_QMLLS_INI ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(Qt6 REQUIRED COMPONENTS Core Sql)
@@ -17,6 +18,7 @@ add_library(core STATIC
 	src/BlockSystem/textBlock.h src/BlockSystem/textBlock.cc
 	src/BlockSystem/checkboxBlock.h src/BlockSystem/checkboxBlock.cc
 	src/BlockSystem/pageBlock.h src/BlockSystem/pageBlock.cc
+	src/BlockSystem/toggleBlock.cc  src/BlockSystem/toggleBlock.h
 )
 target_include_directories(core PUBLIC src)
 target_link_libraries(core PUBLIC Qt6::Quick Qt6::Core Qt6::Sql)

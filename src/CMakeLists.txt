@@ -22,8 +22,9 @@ qt_add_qml_module(appPKM_03_qml
 				UI/CheckboxListItem.qml
 				UI/PageView.qml
 				UI/PageListItem.qml
+				UI/ToggleItem.qml
 		SOURCES
-				QML_FILES UI/toggleItem.qml
+				QML_FILES UI/ToggleItem.qml
 )
 
 set_target_properties(appPKM_03_qml PROPERTIES

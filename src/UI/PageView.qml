@@ -28,6 +28,8 @@ Item{
 			anchors.fill:parent
 			model: root.pageModel
 			spacing:2
+			reuseItems: false
+			implicitHeight: contentHeight
 
 			onCurrentIndexChanged:{
 				// console.log("currind: "+currentIndex)
@@ -41,6 +43,8 @@ Item{
 			delegate: Item{
 				id:delItem
 				width: flickable.width
+				//TODO:
+				// implicitHeight: loader.item ? loader.item.height : 24
 				height:24
 				required property int index
 				property alias _loader:loader
@@ -55,9 +59,13 @@ Item{
 							loader.sourceComponent = checkboxDel
 						} else if(type === "pageBlock"){
 							loader.sourceComponent = pageListItemDel
-						} else{
+						}else if(type==="toggleBlock"){
+							loader.sourceComponent = toggleDel
+						}
+						else{
 							loader.sourceComponent = textDel
 						}
+						listGrid.forceLayout()
 					}
 				}
 
@@ -86,10 +94,15 @@ Item{
 						_width: flickable.width
 						index: delItem.index
 						pageManager: root.pageManager
-
-						
-						// listView: listGrid
-						// pageLoader: root.loader
+					}
+				}
+				Component{
+					id:toggleDel
+					ToggleItem{
+						model:listGrid.model
+						_width: flickable.width
+						index: delItem.index
+						listView: listGrid
 					}
 				}
 			}
@@ -103,7 +116,7 @@ Item{
 				TextField{
 					id: pageTitle
 					// TODO:
-					text: page.p_data.id
+					text: root.page.p_data.id
 					placeholderText: "Unnamed"
 					width:parent.width
 					font.pixelSize: 22
@@ -136,6 +149,11 @@ Item{
 					width:parent.width
 
 					visible:hover.hovered | btnHover.hovered
+					Behavior on visible{
+						NumberAnimation{
+							duration: 100
+						}
+			}
 					onClicked:{
 						itemMenu.popup()
 					}
@@ -164,6 +182,12 @@ Item{
 									// TODO: proper page append AND block to this pageModel
 									// root.pageManager.appendPageToList(root.pageModel.getPageData.id)
 									listGrid.model.append("pageBlock")
+									listGrid.currentIndex = listGrid.model.rowCount()-1
+								}
+							}
+							Action{ text:"Toggle"
+								onTriggered:{
+									listGrid.model.append("toggleBlock")
 									listGrid.currentIndex = listGrid.model.rowCount()-1
 								}
 							}

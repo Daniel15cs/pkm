@@ -1,6 +1,7 @@
 // #include <filesystem>
 #include "BlockSystem/checkboxBlock.h"
 #include "BlockSystem/pageBlock.h"
+#include "BlockSystem/toggleBlock.h"
 #include "PageManager.h"
 #include <PageModel.h>
 
@@ -97,6 +98,9 @@ bool PageModel::append(QVariant blockType){
 		PageBlock *pb = new PageBlock(this);
 		pb->setPageId(id);
 		b = pb;
+	}
+	else if(blockType.toString()=="toggleBlock"){
+		b = new ToggleBlock(this);
 	}
 	else{
 		b = new TextBlock(this);

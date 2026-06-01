@@ -4,6 +4,7 @@ target_sources(appPKM_03_qml PRIVATE
 	textBlock.h textBlock.cc
 	checkboxBlock.h checkboxBlock.cc
 	pageBlock.h pageBlock.cc
+	toggleBlock.h toggleBlock.cc
 	# ${SOURCES}
 )
 target_link_libraries(appPKM_03_qml
