@@ -195,7 +195,6 @@ void PageModel::parseJson(QByteArray input){
 			// qDebug()<<"statejson:" <<content["state"].toVariant();
 			b=cb;
 		}else if(blockType=="pageBlock"){
-			//TODO: add pageBlock parsing
 			PageBlock * pb = new PageBlock(this);
 			pb->setPageId(content["id"].toInt());
 			b=pb;

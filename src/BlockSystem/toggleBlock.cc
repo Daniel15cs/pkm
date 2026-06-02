@@ -3,7 +3,11 @@
 #include <qitemselectionmodel.h>
 #include <qjsonobject.h>
 
-// ToggleBlock::ToggleBlock() :Block(this), m_model(new PageModel(this)){ }
+ToggleBlock::ToggleBlock() :Block(this)//, m_model(new PageModel(this))
+{ }
+QPointer<PageModel> ToggleBlock::model()const{
+	return m_model;
+}
 QVariant ToggleBlock::getData() const {
 	return QVariant();
 }

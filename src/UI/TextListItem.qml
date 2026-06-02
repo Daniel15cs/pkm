@@ -9,6 +9,7 @@ Item{
 	required property int index
 	required property var listView
 	property var logicobject: model.getLogic(baseItem.index)
+	// property string _text: logicobject?.text_p==null ? logicobject.text_p : ""
 	property string _text: logicobject?.text_p
 	height: _height
 	width:_width
@@ -17,7 +18,11 @@ Item{
 	property int _textMargin: 25
 	property alias _compText:compText
 	property string blockType:"textBlock"
-	onHeightChanged: baseItem.listView.itemAtIndex(index).height =baseItem.height
+	onHeightChanged:{
+		var item = baseItem.listView.itemAtIndex(index);
+		if(item !=null)
+		item.height = baseItem.height;
+	} 
 	// Component.onCompleted:{
 	// 	baseItem.listView.currentItem.height = baseItem._height
 	// }
@@ -59,7 +64,7 @@ Item{
 
 			onTextChanged:{
 				baseItem.logicobject.setText(text)
-				baseItem.listView.currentItem.height = baseItem._height
+				baseItem.listView.currentItem.height = baseItem._height==null ? 10 : baseItem._height
 			}
 
 			Keys.onPressed:function(event){
