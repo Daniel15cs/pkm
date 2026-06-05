@@ -1,22 +1,31 @@
 #include <QString>
 #include <qtmetamacros.h>
 #include "block.h"
-#include "../PageModel.h"
 #pragma once
 class ToggleBlock : public Block{
 	Q_OBJECT
-	Q_PROPERTY (PageModel *p_model READ model CONSTANT);
 public: 
+	Q_PROPERTY(bool p_expanded READ expanded WRITE setExpanded NOTIFY expandedChanged)
+	Q_PROPERTY(QString p_text READ text WRITE setText NOTIFY textChanged)
+	// Q_PROPERTY(PageData* p_pageData READ getPageData CONSTANT)
 	ToggleBlock();
 	using Block::Block;
-	Q_INVOKABLE QPointer<PageModel> model() const;
 	QVariant getData() const override;
 	QString typeName()const override;
-	// Q_INVOKABLE void setText(const QString &newText);
+	Q_INVOKABLE void setText(const QString &newText);
+	Q_INVOKABLE QString text();
 	QJsonObject blockToJson()const override;
-private:
-	const QPointer<PageModel> m_model = new PageModel(this);
-	// PageModel *m_model ;//= new PageModel;
 
-	// PageModel *m_model;
+	bool expanded()const;
+	void setExpanded(bool);
+signals:
+	void expandedChanged();
+	void textChanged();
+	
+
+private:
+	QString m_text;
+	bool m_expanded=true;
+
+
 };

@@ -26,33 +26,23 @@ int PageManager::appendPageToList(int parentId){
 	return pd->id;
 }
 void PageManager::uploadList(){ // parse from raw sqlite data to model
-	// QVector<PageData> pagelist = 	
-	bool listIsEmpty = this->pagesList.isEmpty();
+	this->pagesList.clear();
 	for(PageData item : fileModel->getPagesListFromSql()){
 		PageModel *pm = new PageModel(this);
 		PageData *pd = new PageData(item);
-		// qDebug()<<"PManager::uploadList(): id"<<item.id;
 
 		pm->setPageData(pd);
 		pm->parseJson(fileModel->getPageContentFromSql(item.id));
 		pm->callback = [&](int parentId)->int{
-			// qDebug()<<"PManager::callback parentId: "<<parentId;
 			return this->appendPageToList(parentId);
 		};
 
 		Page p = {item,pm};
-		if(listIsEmpty){
-			this->pagesList.append(p);
-		}else{
-			//TODO: somehow save old data or ask user to rewrite it
-			this->pagesList.clear();
-			//update link to model in UI
-			this->pagesList.append(p);
-		}
-		setCurrentPage(1);
-		// qDebug()<<"Pmanager::upload list(): pm->id :"<<pm->getPageData()->id;
+		this->pagesList.append(p);
 	} 
+	if(!pagesList.isEmpty()) setCurrentPage(pagesList[0].data.id);
 }
+
 PageManager::PageManager(FileModel* fm){
 	// fileModel->openDb();
 	fileModel =fm;

@@ -3,18 +3,34 @@
 #include <qitemselectionmodel.h>
 #include <qjsonobject.h>
 
-ToggleBlock::ToggleBlock() :Block(this)//, m_model(new PageModel(this))
-{ }
-QPointer<PageModel> ToggleBlock::model()const{
-	return m_model;
-}
+ToggleBlock::ToggleBlock() :Block(nullptr) { }
+
 QVariant ToggleBlock::getData() const {
-	return QVariant();
+	return QVariant(m_text);
+}
+QString ToggleBlock::text(){
+	return m_text;
+}
+void ToggleBlock::setText(const QString &newText){
+	m_text = newText;
+	emit textChanged();
 }
 QString ToggleBlock::typeName() const{
 	return "toggleBlock";
 }
 
 QJsonObject ToggleBlock::blockToJson()const {
-	return QJsonObject();
+	 QJsonObject content;
+	 content["text"] = m_text;
+	 content["expanded"] = m_expanded;
+	 return Block::prepToJson(content);
+}
+
+bool ToggleBlock::expanded()const{
+	return m_expanded;
+}
+void ToggleBlock::setExpanded(bool e){
+	if(m_expanded==e) return;
+	m_expanded=e;
+	emit expandedChanged();
 }

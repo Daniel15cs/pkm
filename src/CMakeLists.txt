@@ -20,9 +20,11 @@ qt_add_qml_module(appPKM_03_qml
 				UI/Main.qml
 				UI/TextListItem.qml
 				UI/CheckboxListItem.qml
+				UI/BulletListItem.qml
 				UI/PageView.qml
 				UI/PageListItem.qml
 				UI/ToggleItem.qml
+				UI/ListViewDelegate.qml
 		SOURCES
 				QML_FILES UI/ToggleItem.qml
 )

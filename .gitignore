@@ -4,6 +4,7 @@
 Testing/*
 tests/Testing/*
 pkm.db*
+*.md
 *.db*
 *~
 *.autosave

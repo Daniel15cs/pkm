@@ -19,6 +19,7 @@ add_library(core STATIC
 	src/BlockSystem/checkboxBlock.h src/BlockSystem/checkboxBlock.cc
 	src/BlockSystem/pageBlock.h src/BlockSystem/pageBlock.cc
 	src/BlockSystem/toggleBlock.cc  src/BlockSystem/toggleBlock.h
+	src/BlockSystem/bulletBlock.h   src/BlockSystem/bulletBlock.cc
 )
 target_include_directories(core PUBLIC src)
 target_link_libraries(core PUBLIC Qt6::Quick Qt6::Core Qt6::Sql)
