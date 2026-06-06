@@ -344,6 +344,7 @@ void PageModel::addIndentBlock(Block* block){
 
 	if(parent && block->parentBlock()!=parent){
 		parent->children.append(block);
+		if(block->parentBlock()) block->parentBlock()->children.removeOne(block);
 		block->setParentBlock(parent);
 		emit block->levelChanged();
 		updateChildIndent(block);
