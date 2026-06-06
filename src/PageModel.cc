@@ -1,9 +1,13 @@
 // #include <filesystem>
+#include "BlockSystem/block.h"
 #include "BlockSystem/checkboxBlock.h"
 #include "BlockSystem/pageBlock.h"
+#include "BlockSystem/toggleBlock.h"
+#include "BlockSystem/bulletBlock.h"
 #include "PageManager.h"
 #include <PageModel.h>
 
+#include <functional>
 #include <qabstractitemmodel.h>
 #include <qiodevicebase.h>
 #include <qjsonarray.h>
@@ -11,29 +15,26 @@
 #include <qjsonobject.h>
 #include <qlogging.h>
 #include <qnamespace.h>
+#include <qobject.h>
 #include <qpointer.h>
 #include <qstringview.h>
 #include <qvariant.h>
 #include <QDebug>
+
 int PageModel::rowCount(const QModelIndex &parent) const{
 	return blockList.count();
 }
 QVariant PageModel::data(const QModelIndex &index, int role) const{
-    if(index.row()<0 || index.row()>rowCount()) return QVariant();
+	if(index.row()<0 || index.row()>rowCount()-1) return QVariant();
 	switch(role){
 		case LogicBlockRole:{
-			QObject* obj = blockList.at(index.row());
-			return QVariant::fromValue(obj);
-		}
-		// case TextBlockRole :{
-		// 	return blockList.at(index.row())->getData().toString();
-		// }
+				QObject* obj = blockList.at(index.row());
+				return QVariant::fromValue(obj);
+			}
 		default:
 			return QVariant();
 	}
 }
-// QVariant MyListModel::displayData(const QModelIndex &index){
-// }
 
 QHash<int,QByteArray> PageModel::roleNames() const {
 	QHash<int,QByteArray> roles;
@@ -41,14 +42,7 @@ QHash<int,QByteArray> PageModel::roleNames() const {
 	return roles;
 }
 bool PageModel::setData(const QModelIndex &index, const QVariant &value, const int role) {
-	// qDebug()<<"setData()";
 	if(index.isValid()&&role==Qt::EditRole){
-		int ir = index.row();
-
-		beginInsertRows(index,ir,ir);
-		qDebug()<<"setData:"<<value;
-		endInsertRows();
-
 		emit dataChanged(index, index, {role});
 		return true;
 	}
@@ -60,24 +54,23 @@ Qt::ItemFlags PageModel::flags(const QModelIndex &index)const{
 		return Qt::ItemIsEnabled;
 	return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
+
 bool PageModel::append(Block *b){
 	int rc = rowCount();
-
 	this->beginInsertRows(QModelIndex(), rc,rc);
 	blockList.append(b);
+	realList.append(b);
 	this->endInsertRows();
-
-	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
 	return true;
 } 
+
 bool PageModel::append(){
 	int rc = rowCount();
-
+	Block* b =  new TextBlock(this);
 	this->beginInsertRows(QModelIndex(), rc,rc);
-	blockList.append(new TextBlock(this));
+	blockList.append(b);
+	realList.append(b);
 	this->endInsertRows();
-
-	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
 	return true;
 } 
 bool PageModel::append(QVariant blockType){
@@ -85,28 +78,27 @@ bool PageModel::append(QVariant blockType){
 	Block *b;
 	if (blockType.toString()=="checkboxBlock"){
 		b = new CheckboxBlock(this);
+	}else if(blockType.toString()=="bulletBlock"){
+		b = new BulletBlock(this);
 	}else if(blockType.toString()=="pageBlock"){
-		//TODO: error segfault
-		// append new page into pagelist
 		int id=1;
 		if(callback){
 			id = callback(getPageData()->id);
-			qDebug()<<"PModel::callback id:"<<id<<"Pdata->id: "<<getPageData()->id;
 		}
-
 		PageBlock *pb = new PageBlock(this);
 		pb->setPageId(id);
 		b = pb;
 	}
+	else if(blockType.toString()=="toggleBlock"){
+		b = new ToggleBlock(this);
+	}
 	else{
 		b = new TextBlock(this);
 	}
-
 	this->beginInsertRows(QModelIndex(), rc,rc);
 	blockList.append(b);
+	realList.append(b);
 	this->endInsertRows();
-
-	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
 	return true;
 } 
 bool PageModel::insert(QVariant blockType, const int _index){
@@ -114,44 +106,52 @@ bool PageModel::insert(QVariant blockType, const int _index){
 	Block *b;
 	if (blockType.toString()=="checkboxBlock"){
 		b = new CheckboxBlock(this);
+	}else if(blockType.toString()=="bulletBlock"){
+		b = new BulletBlock(this);
+	}else if(blockType.toString()=="toggleBlock"){
+		b = new ToggleBlock(this);
+	}else if(blockType.toString()=="pageBlock"){
+		PageBlock *pb = new PageBlock(this);
+		b = pb;
 	}else{
 		b = new TextBlock(this);
 	}
 
 	this->beginInsertRows(QModelIndex(), rc,rc);
 	blockList.insert(rc,b);
+	realList.append(b);
 	this->endInsertRows();
-
-	emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
 	return true;
-
 }
 void PageModel::removeRow(const int index){
 	int ir = index;
 	if(ir>=rowCount() ||ir<0){
-		qDebug()<<"index: "<<ir<<" out of range";
 		return;
 	}
-
+	Block* b = blockList.at(index);
+	if(b->parentBlock()){
+		b->parentBlock()->children.removeOne(b);
+	}
+	rmChildList(b);
 	this->beginRemoveRows(QModelIndex(),ir,ir);
 	blockList.removeAt(ir);
+	realList.removeOne(b);
 	this->endRemoveRows();
+	delete b;
 }
 
 QByteArray PageModel::listToJson(){
 	QJsonArray array;
-  QJsonObject obj;
-	// obj.insert("PageName","PKM_03");
-	// array.append(obj);
+	QJsonObject obj;
 
-	for(auto item:blockList){
+	for(auto item : realList){
+		if(!item->parentBlock())
 			array.append(item->blockToJson());
 	}
 	obj["blockList"]=array;
 
 	QJsonDocument doc(obj);
 	QByteArray res = doc.toJson(QJsonDocument::Compact);
-	qDebug()<<"res: "<<res;
 	return res;
 }
 
@@ -160,54 +160,79 @@ void PageModel::parseJson(QByteArray input){
 	QJsonArray array;
 	if(doc["blockList"].isArray())
 		array= doc["blockList"].toArray();
-	// qDebug()<<"array: "<<array;
-	int r = rowCount()-1;
 
-	this->beginRemoveRows(QModelIndex(),0,r);
-	blockList.clear();
-	this->endRemoveRows();
-	emit dataChanged(index(0,0), index(r,0), {Qt::EditRole});
-	// qDebug()<<"after clear: "<<rowCount();
-
-	for(auto item: array){
-		auto obj = item.toObject();
-		// qDebug()<<"obj: "<< obj;
-		if(!obj.contains("type"))
-			continue;
-		QString blockType = obj["type"].toString();
-		// qDebug()<<"type: "<<blockType;
-
-		Block *b;
-		QJsonObject content = obj["content"].toObject();
-		if(blockType=="textBlock"){
-			TextBlock *tb = new TextBlock(this);
-			tb->setText(content["text"].toString());
-			b=tb;
-			// qDebug()<<"text: "<<tb->text();
-		}else if(blockType=="checkboxBlock"){
-			CheckboxBlock *cb = new CheckboxBlock(this);
-			cb->setText(content["text"].toString());
-			cb->setState(content["state"].toVariant());
-			// qDebug()<<"statejson:" <<content["state"].toVariant();
-			b=cb;
-		}else if(blockType=="pageBlock"){
-			//TODO: add pageBlock parsing
-			PageBlock * pb = new PageBlock(this);
-			pb->setPageId(content["id"].toInt());
-			b=pb;
-		}
-		else{
-			return;
-		}
-		int rc = rowCount();
-		this->beginInsertRows(QModelIndex(),rc,rc);
-		blockList.append(b);
-		// qDebug()<<"append";
-		this->endInsertRows();
-		emit dataChanged(index(rc,0),index(rc,0),{Qt::EditRole});
-		// delete(b);
+	int r = rowCount();
+	if(r > 0){
+		this->beginRemoveRows(QModelIndex(),0,r-1);
+		for(auto b : realList) delete b;
+		blockList.clear();
+		realList.clear();
+		this->endRemoveRows();
 	}
-	// qDebug()<<"parse";
+
+	std::function<void(const QJsonArray&, Block*)> loadBlocks = [&](const QJsonArray& arr, Block* parent) {
+		for(auto item : arr){
+			auto obj = item.toObject();
+			if(!obj.contains("type")) continue;
+			QString blockType = obj["type"].toString();
+			QJsonObject content = obj["content"].toObject();
+			
+			Block *b = nullptr;
+			if(blockType=="textBlock"){
+				TextBlock *tb = new TextBlock(this);
+				tb->setText(content["text"].toString());
+				b=tb;
+			}else if(blockType=="checkboxBlock"){
+				CheckboxBlock *cb = new CheckboxBlock(this);
+				cb->setText(content["text"].toString());
+				cb->setState(content["state"].toVariant());
+				b=cb;
+			}else if(blockType=="bulletBlock"){
+				BulletBlock *bb = new BulletBlock(this);
+				bb->setText(content["text"].toString());
+				b=bb;
+			}else if(blockType=="pageBlock"){
+				PageBlock * pb = new PageBlock(this);
+				pb->setPageId(content["id"].toInt());
+				b=pb;
+			}else if(blockType=="toggleBlock"){
+				ToggleBlock *tg = new ToggleBlock(this);
+				tg->setText(content["text"].toString());
+				tg->setExpanded(content["expanded"].toBool());
+				b=tg;
+			}
+
+			if(b){
+				realList.append(b);
+				b->setParentBlock(parent);
+				if(parent) parent->children.append(b);
+
+				bool visible = true;
+				Block* p = parent;
+				while(p){
+					auto tb = qobject_cast<ToggleBlock*>(p);
+					if(tb && !tb->expanded()){
+						visible = false;
+						break;
+					}
+					p = p->parentBlock();
+				}
+
+				if(visible){
+					int rc = rowCount();
+					beginInsertRows(QModelIndex(), rc, rc);
+					blockList.append(b);
+					endInsertRows();
+				}
+
+				if(obj.contains("children")){
+					loadBlocks(obj["children"].toArray(), b);
+				}
+			}
+		}
+	};
+
+	loadBlocks(array, nullptr);
 }
 
 void PageModel::parseJson(QString input){
@@ -220,10 +245,7 @@ QVariant PageModel::getLogic(const int _index){
 }
 
 PageData* PageModel::getPageData(){
-	// qDebug()<<"getPageData: id: "<<this->pageData->id;
-	// PageData *pd = pageData;
 	if(pageData){
-		// qDebug()<<"PModel::getPageData pd.id: "<<pageData->id<<" pid: "<<pageData->parentId;
 		return pageData;
 	}else{
 		PageData *pd = new PageData{-1,-1,"",""};
@@ -233,5 +255,126 @@ PageData* PageModel::getPageData(){
 
 void PageModel::setPageData(PageData* pd){
 	pageData = pd;
-	qDebug()<<"PModel::setPageData: id"<<pd->id <<" pid:" <<pd->parentId;
+}
+
+void PageModel::insertChildList(ToggleBlock* toggle){
+	int toggleIndex = blockList.indexOf(toggle);
+	if(toggleIndex <0) return;
+	QVector<Block*> visibleChildren;
+
+	std::function<void(Block*)> walk;
+
+	walk = [&](Block* block){
+		visibleChildren.append(block);
+		auto tb = qobject_cast<ToggleBlock*>(block);
+		if(!tb || tb->expanded()){
+			for(auto child : block->children)
+				walk(child);
+		}
+	};
+	for(auto child: toggle->children){
+		walk(child);
+	}
+	if(visibleChildren.isEmpty()) return;
+
+	int first = toggleIndex+1;
+	int last = first + visibleChildren.size()-1;
+
+	beginInsertRows({},first,last);
+	for(int i=0; i<visibleChildren.size();i++)
+		blockList.insert(first+i, visibleChildren[i]);
+
+	endInsertRows();
+}
+void PageModel::rmChildList(Block* toggle){
+	int toggleIndex = blockList.indexOf(toggle);
+	if(toggleIndex<0) return;
+	int count = countChilds(toggle);
+
+	if(count==0 || count > blockList.count())return;
+
+	beginRemoveRows({},toggleIndex+1, toggleIndex+count);
+	for(int i=0;i<count; i++)
+		blockList.removeAt(toggleIndex+1);
+	endRemoveRows();
+}
+
+void PageModel::toggle(ToggleBlock* toggle){
+	if(toggle->expanded()){
+		rmChildList(toggle);
+		toggle->setExpanded(false);
+	}
+	else{
+		toggle->setExpanded(true);
+		insertChildList(toggle);
+	}
+}
+
+int PageModel::countChilds(Block* block){
+	int counter = 0;
+	if(block->children.isEmpty()==false){
+		auto tb = qobject_cast<ToggleBlock*>(block);
+		if(!tb || tb->expanded()){
+			for(auto b: block->children){
+				counter++;
+				counter += countChilds(b);
+			}
+		}
+	}
+	return counter;
+}
+void PageModel::updateChildIndent(Block* block){
+	int counter = countChilds(block);
+	if(block->children.isEmpty()==false){
+		for(auto b: block->children){
+			b->levelChanged();
+			if(counter>0){
+				if(b->children.isEmpty()==false)updateChildIndent(b);
+				counter--;
+			}
+		}
+	}
+}
+void PageModel::addIndentBlock(Block* block){
+	int row = blockList.indexOf(block);
+	if(row <=0) return;
+	Block* prev=blockList[row-1];
+
+	Block* parent = prev;
+
+	if(parent && block->parentBlock()!=parent){
+		parent->children.append(block);
+		if(block->parentBlock()) block->parentBlock()->children.removeOne(block);
+		block->setParentBlock(parent);
+		emit block->levelChanged();
+		updateChildIndent(block);
+		
+		auto tb = qobject_cast<ToggleBlock*>(parent);
+		if(tb && tb->expanded()==false){
+			rmChildList(block);
+			this->beginRemoveRows(QModelIndex(),row,row);
+			blockList.removeAt(row);
+			this->endRemoveRows();
+		}
+		qDebug()<<"block indented under" << parent->typeName();
+	}
+}
+void PageModel::rmIndentBlock(Block* block){
+	Block* p = block->parentBlock();
+	if(p==nullptr) return;
+	Block* pp = p->parentBlock();
+
+	if(p && pp){
+		int index = p->children.indexOf(block);
+		if(index>=0){
+			p->children.removeOne(block);
+			pp->children.append(block);
+			block->setParentBlock( pp );
+		}
+	}else{
+		block->setParentBlock(nullptr);
+		p->children.removeOne(block);
+	}
+	emit block->levelChanged();
+	updateChildIndent(block);
 }

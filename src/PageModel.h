@@ -15,6 +15,8 @@
 #include "BlockSystem/block.h"
 #include "BlockSystem/textBlock.h"
 #include "BlockSystem/checkboxBlock.h"
+#include "BlockSystem/toggleBlock.h"
+#include "BlockSystem/bulletBlock.h"
 #include "filemodel.h"
 
 
@@ -26,7 +28,7 @@ class PageModel : public QAbstractListModel{
 		LogicBlockRole = Qt::UserRole+1,
 	};
 public:
-	explicit PageModel (QObject *parent = nullptr): QAbstractListModel(parent){}
+	explicit PageModel (QObject *parent = nullptr): QAbstractListModel(parent), pageData(nullptr){}
 
 	int rowCount(const QModelIndex &parent = QModelIndex())const override;
 	QVariant data(const QModelIndex &index, int role)const override;
@@ -37,20 +39,34 @@ public:
 	Q_INVOKABLE bool append(Block *b);
 	Q_INVOKABLE bool append();
 	Q_INVOKABLE bool append(QVariant blockType);
+
 	Q_INVOKABLE bool insert(QVariant blockType, const int index);
 	Q_INVOKABLE void removeRow(const int index);
+
 	Q_INVOKABLE QByteArray listToJson();
 	Q_INVOKABLE void parseJson(QByteArray);
 	Q_INVOKABLE void parseJson(QString);
-	Q_INVOKABLE QVariant getLogic(const int _index);
+
+	Q_INVOKABLE QVariant getLogic(const int);
 
 	Q_INVOKABLE PageData* getPageData();
 	void setPageData(PageData*);
 	std::function<int(int)> callback;
+
+	// void buildVisibleList();
+	void insertChildList(ToggleBlock*);
+	void rmChildList(Block*);
+	Q_INVOKABLE void toggle(ToggleBlock*);
+	Q_INVOKABLE void addIndentBlock(Block*);
+	Q_INVOKABLE void rmIndentBlock(Block*);
+	void updateChildIndent(Block*);
+	int countChilds(Block* block);
+
 	// Q_INVOKABLE QVariant displayData(const QModelIndex &index);
 	// void setModelData(const QStringList& data);
 private:
 	QVector<Block*> blockList;
+	QVector<Block*> realList;
 	PageData *pageData;
 };
 

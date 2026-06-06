@@ -6,6 +6,7 @@
 #include "../src/BlockSystem/checkboxBlock.h"
 #include "../src/BlockSystem/textBlock.h"
 #include "../src/BlockSystem/pageBlock.h"
+#include "../src/BlockSystem/toggleBlock.h"
 
 class TestBlocks: public QObject{
 	Q_OBJECT

@@ -9,6 +9,7 @@
 #include "../src/BlockSystem/checkboxBlock.h"
 #include "../src/BlockSystem/textBlock.h"
 #include "../src/BlockSystem/pageBlock.h"
+#include "../src/BlockSystem/bulletBlock.h"
 
 // =======================================================
 // TestPageModel
@@ -79,13 +80,14 @@ private slots:
         m.append();
         m.append("checkboxBlock");
         m.append("pageBlock");
+        m.append("bulletBlock");
 
         QByteArray json = m.listToJson();
 
         PageModel m2;
         m2.parseJson(json);
 
-        QCOMPARE(m2.rowCount(), 3);
+        QCOMPARE(m2.rowCount(), 4);
 
         QCOMPARE(QString(m2.getLogic(0).value<QObject*>()->metaObject()->className()),
                  QString("TextBlock"));
@@ -94,6 +96,170 @@ private slots:
                  QString("CheckboxBlock"));
         QCOMPARE(QString(m2.getLogic(2).value<QObject*>()->metaObject()->className()),
                  QString("PageBlock"));
+        QCOMPARE(QString(m2.getLogic(3).value<QObject*>()->metaObject()->className()),
+                 QString("BulletBlock"));
+    }
+
+    void testToggleBlockRoundTrip() {
+        PageModel m;
+        m.append("toggleBlock");
+        ToggleBlock* tg = qobject_cast<ToggleBlock*>(m.getLogic(0).value<QObject*>());
+        tg->setText("Parent");
+        tg->setExpanded(true);
+
+        m.append("textBlock");
+        Block* child = qobject_cast<Block*>(m.getLogic(1).value<QObject*>());
+        m.addIndentBlock(child); 
+        static_cast<TextBlock*>(child)->setText("Child");
+
+        QCOMPARE(m.rowCount(), 2);
+        QCOMPARE(tg->children.count(), 1);
+
+        QByteArray json = m.listToJson();
+        
+        PageModel m2;
+        m2.parseJson(json);
+
+        QCOMPARE(m2.rowCount(), 2);
+        ToggleBlock* tg2 = qobject_cast<ToggleBlock*>(m2.getLogic(0).value<QObject*>());
+        QVERIFY(tg2);
+        QCOMPARE(tg2->text(), QString("Parent"));
+        QCOMPARE(tg2->children.count(), 1);
+        
+        TextBlock* child2 = qobject_cast<TextBlock*>(tg2->children.at(0));
+        QVERIFY(child2);
+        QCOMPARE(child2->text(), QString("Child"));
+    }
+
+    void testToggleBlockCollapsedAfterParse() {
+        PageModel m;
+        m.append("toggleBlock");
+        ToggleBlock* tg = qobject_cast<ToggleBlock*>(m.getLogic(0).value<QObject*>());
+        tg->setText("Parent");
+        tg->setExpanded(false);
+
+        m.append("textBlock");
+        Block* child = qobject_cast<Block*>(m.getLogic(1).value<QObject*>());
+        m.addIndentBlock(child); 
+
+        QCOMPARE(m.rowCount(), 1); 
+        QCOMPARE(tg->children.count(), 1);
+
+        QByteArray json = m.listToJson();
+        
+        PageModel m2;
+        m2.parseJson(json);
+
+        QCOMPARE(m2.rowCount(), 1); 
+        ToggleBlock* tg2 = qobject_cast<ToggleBlock*>(m2.getLogic(0).value<QObject*>());
+        QCOMPARE(tg2->expanded(), false);
+        QCOMPARE(tg2->children.count(), 1);
+    }
+
+    void testCountChilds() {
+        PageModel m;
+        m.append("toggleBlock"); // 0
+        m.append("textBlock");   // 1
+        m.append("textBlock");   // 2
+
+        ToggleBlock* t = qobject_cast<ToggleBlock*>(m.getLogic(0).value<QObject*>());
+        Block* b1 = qobject_cast<Block*>(m.getLogic(1).value<QObject*>());
+        Block* b2 = qobject_cast<Block*>(m.getLogic(2).value<QObject*>());
+
+        m.addIndentBlock(b1);
+        m.addIndentBlock(b2);
+
+        QCOMPARE(m.countChilds(t), 2);
+        
+        t->setExpanded(false);
+        QCOMPARE(m.countChilds(t), 0); // countChilds only counts if expanded
+    }
+
+    void testAddIndentBlock() {
+        PageModel m;
+        m.append("toggleBlock"); // A
+        m.append("textBlock");   // B
+        
+        ToggleBlock* a = qobject_cast<ToggleBlock*>(m.getLogic(0).value<QObject*>());
+        Block* b = qobject_cast<Block*>(m.getLogic(1).value<QObject*>());
+        
+        m.addIndentBlock(b);
+        QCOMPARE(b->parentBlock(), a);
+        QVERIFY(a->children.contains(b));
+        QCOMPARE(b->level(), 1);
+    }
+
+    void testRmIndentBlock() {
+        PageModel m;
+        m.append("toggleBlock"); // A
+        m.append("textBlock");   // B
+        
+        ToggleBlock* a = qobject_cast<ToggleBlock*>(m.getLogic(0).value<QObject*>());
+        Block* b = qobject_cast<Block*>(m.getLogic(1).value<QObject*>());
+        
+        m.addIndentBlock(b);
+        m.rmIndentBlock(b);
+        
+        QVERIFY(b->parentBlock() == nullptr);
+        QVERIFY(!a->children.contains(b));
+        QCOMPARE(b->level(), 0);
+    }
+
+    void testRmChildList() {
+        PageModel m;
+        m.append("toggleBlock"); // 0
+        m.append("textBlock");   // 1
+        
+        ToggleBlock* t = qobject_cast<ToggleBlock*>(m.getLogic(0).value<QObject*>());
+        Block* b = qobject_cast<Block*>(m.getLogic(1).value<QObject*>());
+        
+        m.addIndentBlock(b);
+        QCOMPARE(m.rowCount(), 2);
+        
+        m.rmChildList(t);
+        QCOMPARE(m.rowCount(), 1);
+        QCOMPARE(m.getLogic(0).value<QObject*>(), t);
+    }
+
+    void testInsertChildList() {
+        PageModel m;
+        m.append("toggleBlock");
+        ToggleBlock* t = qobject_cast<ToggleBlock*>(m.getLogic(0).value<QObject*>());
+        t->setExpanded(false);
+
+        Block* child = new TextBlock(&m);
+        t->children.append(child);
+        child->setParentBlock(t);
+
+        QCOMPARE(m.rowCount(), 1);
+        m.toggle(t); // will call insertChildList
+        QCOMPARE(m.rowCount(), 2);
+        QCOMPARE(m.getLogic(1).value<QObject*>(), child);
+    }
+
+    void testNonToggleHierarchy() {
+        PageModel m;
+        m.append("textBlock"); // A
+        m.append("textBlock"); // B
+        
+        Block* a = qobject_cast<Block*>(m.getLogic(0).value<QObject*>());
+        Block* b = qobject_cast<Block*>(m.getLogic(1).value<QObject*>());
+        
+        m.addIndentBlock(b);
+        
+        QCOMPARE(b->parentBlock(), a);
+        QVERIFY(a->children.contains(b));
+        QCOMPARE(b->level(), 1);
+        QCOMPARE(m.rowCount(), 2); // Should still be visible
+        
+        QByteArray json = m.listToJson();
+        PageModel m2;
+        m2.parseJson(json);
+        
+        QCOMPARE(m2.rowCount(), 2);
+        Block* a2 = qobject_cast<Block*>(m2.getLogic(0).value<QObject*>());
+        QCOMPARE(a2->children.count(), 1);
+        QCOMPARE(a2->children.at(0)->level(), 1);
     }
 
     void testParseJsonRestoresData()

@@ -6,15 +6,16 @@ Item{
 	id:root
 	height: _height
 	width:_width
+	x: logicObj.level*24 ?? 0
 	property int _height: 20
 	property int _width:  100
 	required property var pageManager
 	required property var model
 	required property int index
+	required property var logicObj
 	// required property var listView
 	// required property var pageLoader
 	
-	property var blockLogic: model.getLogic(root.index)
 	function onCurrent(){
 	}
 	Component.onCompleted:{
@@ -22,7 +23,7 @@ Item{
 		// console.log("listItem rootpage:" +root.controller.p_rootPage)
 		// console.log("listItem logic: "+pageModel)
 		// console.log("listItem model: "+root.model+"\n")
-		console.log(root.model)
+		// console.log(root.model)
 		// console.log(root.model.p_pageData)
 	}
 	MessageDialog{
@@ -38,17 +39,17 @@ Item{
 		Button{
 			spacing: 4
 			// text: "PageBtn"
-			text: "id:"+root.blockLogic.p_pageId
+			text: "id:"+root.logicObj.p_pageId
 			// text:"test"
 			height: root._height
 			width:root._width-25
 			onPressed:{
-				console.log(root.model)
+				// console.log(root.model)
 				// console.log("listItem rootpageold:" +root.controller.p_rootPage)
-				console.log("pageListItem page id: " +root.model.p_pageData.id)
-				console.log("pageListItem pageData: " +root.model.p_pageData)
+				// console.log("pageListItem page id: " +root.model.p_pageData.id)
+				// console.log("pageListItem pageData: " +root.model.p_pageData)
 				//TODO: page manager is undefined
-				root.pageManager.setCurrentPage(root.blockLogic.p_pageId)
+				root.pageManager.setCurrentPage(root.logicObj.p_pageId)
 				//TODO:
 				// root.controller.setRootPage(root.pageModel)
 			}
