@@ -51,7 +51,7 @@ public:
 
 	Q_INVOKABLE PageData* getPageData();
 	void setPageData(PageData*);
-	std::function<int(int)> callback;
+	std::function<int(int, QString)> callback;
 
 	// void buildVisibleList();
 	void insertChildList(ToggleBlock*);

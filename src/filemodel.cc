@@ -49,12 +49,35 @@ bool FileModel::openDb(QString path){
 		qDebug()<<"db error: "<< db.lastError().text();
 		return false;
 	}
+
+	// Schema management
+	QSqlQuery q(db);
+	// Create table if not exists
+	if(!q.exec("CREATE TABLE IF NOT EXISTS Notes (id INTEGER PRIMARY KEY AUTOINCREMENT, parentId INTEGER, type TEXT, content BLOB, created_at TEXT);")) {
+		qDebug() << "Create table error:" << q.lastError().text();
+	}
+
+	// Check for created_at column (migration for existing DBs)
+	q.exec("PRAGMA table_info(Notes);");
+	bool hasCreatedAt = false;
+	while(q.next()) {
+		if(q.value(1).toString() == "created_at") {
+			hasCreatedAt = true;
+			break;
+		}
+	}
+	if(!hasCreatedAt) {
+		if(!q.exec("ALTER TABLE Notes ADD COLUMN created_at TEXT;")) {
+			qDebug() << "Migration error (created_at):" << q.lastError().text();
+		}
+	}
+
 	return true;
 }
 QVector<PageData> FileModel::getPagesListFromSql(){
 		QSqlQuery q;
 		QVector<PageData> notesList;
-		QString query ="select * from Notes;";
+		QString query ="select id, parentId, type, created_at from Notes;";
 		if(!q.exec(query)){
 			qDebug()<<"parse to list Error: "<<q.lastError().text();
 			return QVector<PageData>();
@@ -63,15 +86,16 @@ QVector<PageData> FileModel::getPagesListFromSql(){
 			int id = q.value("id").toInt();
 			int parentId = q.value("parentId").toInt();
 			QString type = q.value("type").toString();
+			QString createdAt = q.value("created_at").toString();
 
-			PageData n = {id,parentId,type};
+			PageData n = {id,parentId,type,createdAt};
 			notesList.append(n);
 		}
 	return notesList;
 }
 PageData FileModel::getPageDataFromSql(int id){
 	QSqlQuery q(this->db);
-	QString query="select id, parentId, type,content from Notes where id=:id";
+	QString query="select id, parentId, type, content, created_at from Notes where id=:id";
 
 	q.prepare(query);
 	q.bindValue(0,id);
@@ -85,10 +109,12 @@ PageData FileModel::getPageDataFromSql(int id){
 	int parentId;
 	QString type;
 	QByteArray content;
+	QString createdAt;
 	parentId = q.value("parentId").toInt();
 	content = q.value("content").toByteArray();
 	type = q.value("type").toString();
-	PageData pd{id, parentId, type, content};
+	createdAt = q.value("created_at").toString();
+	PageData pd{id, parentId, type, createdAt, content};
 	return pd;
 }
 QString FileModel::getPageContentFromSql(int id){
@@ -117,29 +143,45 @@ bool FileModel::idCheckInDb(int _id){
 	}
 	return false;
 }
+#include <QDateTime>
+
+void FileModel::setDataToSql(PageData item, int pageId){
+    QVector<PageData> list;
+    item.id = pageId;
+    list.append(item);
+    updateListToDb(list);
+}
+
 bool FileModel::updateListToDb(QVector<PageData> list){
 		// TODO: update Notes set blabla=blalba where id=blabla 
 	for(auto item:list){
 		QSqlQuery q; 
 		QString query;
-		if(idCheckInDb(item.id)){
-			query="update Notes set parentId=:parentId, type=:type, content=:content where id=:id";
+		bool isUpdate = idCheckInDb(item.id);
+		if(isUpdate){
+			query="update Notes set parentId=:parentId, type=:type, content=:content, created_at=:created_at where id=:id";
 			q.prepare(query);
 			q.bindValue(":id",item.id);
 			qDebug()<<"checkid true";
 		}else{
-			query="insert into Notes(parentId,type,content) values(:parentId,:type,:content)";
+			query="insert into Notes(id,parentId,type,content,created_at) values(:id,:parentId,:type,:content,:created_at)";
 			q.prepare(query);
+			q.bindValue(":id",item.id);
 			qDebug()<<"checkid false";
 		}
 		int parentId= item.parentId;
 		QString type= item.type=="" ? "note" : item.type;
 		QByteArray content= item.content;
+		QString createdAt = item.createdAt;
+		if(createdAt.isEmpty()){
+			createdAt = QDateTime::currentDateTime().toString("dd.mm.yyyy");
+		}
 
 		q.bindValue(":parentId",parentId);
 		q.bindValue(":type",type);
 		//TODO: content check for injections
 		q.bindValue(":content",content);
+		q.bindValue(":created_at",createdAt);
 
 		if(!q.exec()){
 			qDebug()<<"saveListTodb error: "<<q.lastError().text();

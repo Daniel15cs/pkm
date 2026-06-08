@@ -5,7 +5,7 @@
 #pragma once
 class PageBlock : public Block{
 	Q_OBJECT
-	Q_PROPERTY (int p_pageId READ getPageId CONSTANT);
+	Q_PROPERTY (int p_pageId READ getPageId WRITE setPageId NOTIFY pageIdChanged);
 public: 
 	// PageBlock();
 	using Block::Block;
@@ -17,6 +17,7 @@ public:
 	int getPageId()const;
 signals:
 	void pageNameChanged(QString);
+	void pageIdChanged();
 private:
 	int pageId=-1;
 };

@@ -14,7 +14,9 @@ QJsonObject PageBlock::blockToJson()const{
 	return prepToJson(obj);
 }
 void PageBlock::setPageId(int id){
+	if(pageId == id) return;
 	pageId = id;
+	emit pageIdChanged();
 }
 int PageBlock::getPageId()const{
 	return pageId;

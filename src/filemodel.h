@@ -23,8 +23,10 @@ public:
 	Q_PROPERTY(int id MEMBER id)
 	Q_PROPERTY(int parentId MEMBER parentId)
 	Q_PROPERTY(QString type MEMBER type)
-	int id=1, parentId=-1;
+	Q_PROPERTY(QString createdAt MEMBER createdAt)
+	int id=-1, parentId=-1;
 	QString type="note";
+	QString createdAt;
 	QByteArray content;
 	bool operator==(const PageData&)const =default;
 	QML_VALUE_TYPE(pageData)

@@ -5,39 +5,67 @@
 #include <qdebug.h>
 #include <qlogging.h>
 
+#include "DatabaseModel.h"
+#include <QDateTime>
+
 void PageManager::setFileModel(FileModel *fm){
 	this->fileModel = fm;
 }
 
-int PageManager::appendPageToList(int parentId){
+int PageManager::appendPageToList(int parentId, QString type){
+	int maxId = 0;
+	for(const auto& p : pagesList) {
+		if(p.data.id > maxId) maxId = p.data.id;
+	}
+	qDebug()<<"max id: "<<maxId;
+	
 	PageData *pd = new PageData();
-	pd->id=pagesList.length()+1;
+	pd->id = maxId + 1;
+	qDebug()<<"pdId: "<<pd->id;
 	pd->parentId= parentId;
+	pd->type = type;
+	pd->createdAt = QDateTime::currentDateTime().toString("dd.MM.yyyy");
+
 	PageModel  *pm =new PageModel(this);
-	// qDebug()<<"PManager::appendPageToList()PD: id"<<pd->id<<" pid: "<<pd->parentId;
 	pm->setPageData(pd);
-	pm->callback = [&](int parentId)->int{
-		// qDebug()<<"PManager::callback parentId: "<<parentId;
-		return this->appendPageToList(parentId);
+	pm->callback = [&](int parentId, QString type)->int{
+		qDebug()<<"PManager::callback parentId: "<<parentId;
+		return this->appendPageToList(parentId, type);
 	};
-	// qDebug()<<"PManager::appendPageToList()PModel: id" << pm->getPageData()->id << " pid: " << pm->getPageData()->parentId;
-	Page p = {*pd,pm};
+
+	DatabaseModel *dbm = new DatabaseModel(this);
+	dbm->setManager(this);
+	dbm->load(pd->id, QByteArray());
+
+	Page p = {*pd, pm, dbm};
 	this->pagesList.append(p);
+	emit pagesChanged();
 	return pd->id;
 }
 void PageManager::uploadList(){ // parse from raw sqlite data to model
+	qDebug()<<"uploadList";
 	this->pagesList.clear();
 	for(PageData item : fileModel->getPagesListFromSql()){
-		PageModel *pm = new PageModel(this);
 		PageData *pd = new PageData(item);
 
+		PageModel *pm = new PageModel(this);
 		pm->setPageData(pd);
-		pm->parseJson(fileModel->getPageContentFromSql(item.id));
-		pm->callback = [&](int parentId)->int{
-			return this->appendPageToList(parentId);
+		pm->callback = [&](int parentId, QString type)->int{
+			qDebug()<<"callback";
+			return this->appendPageToList(parentId, type);
 		};
 
-		Page p = {item,pm};
+		DatabaseModel *dbm = new DatabaseModel(this);
+		dbm->setManager(this);
+
+		QString contentStr = fileModel->getPageContentFromSql(item.id);
+		pm->parseJson(contentStr);
+
+		if(item.type == "DataBase") {
+			dbm->load(item.id, contentStr.toUtf8());
+		}
+
+		Page p = {item, pm, dbm};
 		this->pagesList.append(p);
 	} 
 	if(!pagesList.isEmpty()) setCurrentPage(pagesList[0].data.id);
@@ -57,8 +85,11 @@ PageManager::PageManager(FileModel* fm){
 	// }
 	if(!pagesList.isEmpty())
 		currentPage = pagesList[0];
-	else
+	else{
 		qDebug()<<"pageManager constr: pagesList is empty";
+		appendPageToList();
+		currentPage = pagesList[0];
+	}
 		// currentPage = Page();
 		// pagesList.append(currentPage);
 		// pagesList.append(Page());
@@ -99,7 +130,7 @@ void PageManager::savePagesList(){
 		pdList.append(pd);
 	}
 
-	// qDebug()<<"saveList: " << fileModel->updateListToDb(pdList);
+	qDebug()<<"saveList: " << fileModel->updateListToDb(pdList);
 }
 
 Page PageManager::getPageById(int id){
@@ -109,4 +140,26 @@ Page PageManager::getPageById(int id){
 		}
 	}
 	return Page();
+}
+
+QVector<PageData> PageManager::getPagesByParent(int parentId) {
+    QVector<PageData> result;
+    for (const auto &p : pagesList) {
+        if (p.data.parentId == parentId) {
+            result.append(p.data);
+        }
+    }
+    return result;
+}
+
+void PageManager::updatePageContent(int pageId, const QByteArray &content) {
+    for (int i = 0; i < pagesList.size(); ++i) {
+        if (pagesList[i].data.id == pageId) {
+            pagesList[i].data.content = content;
+            if (fileModel) {
+                fileModel->setDataToSql(pagesList[i].data, pageId);
+            }
+            break;
+        }
+    }
 }

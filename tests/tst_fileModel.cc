@@ -14,22 +14,13 @@ class TestFileModel: public QObject{
 
 private slots:
 	void init(){
-		list = {PageData{1,-1, "note", "bla bla bla"}};
-		// db = QSqlDatabase::addDatabase("QSQLITE","test");
-		// db.setDatabaseName(":memory:");
-		// QVERIFY(db.open());
+		list = {PageData{1,-1, "note", "01.01.2026", "bla bla bla"}};
 		fm = new FileModel();
 		fm->openDb(":memory:");
 
 		QSqlQuery q(fm->db);
-		QVERIFY(q.exec(R"(create table Notes(
-				id integer primary key not null,
-				parentId integer not null default -1,
-				type text not null default "note",
-				content text)
-				)"));
-		QString query ="insert into Notes(id,parentId,type,content)"
-		"values(1,-1,\"note\",\"bla bla bla\")";
+		QString query ="insert into Notes(id,parentId,type,content,created_at)"
+		"values(1,-1,\"note\",\"bla bla bla\", \"01.01.2026\")";
 		QVERIFY(q.exec(query));
 	}
 

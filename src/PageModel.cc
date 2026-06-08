@@ -80,10 +80,12 @@ bool PageModel::append(QVariant blockType){
 		b = new CheckboxBlock(this);
 	}else if(blockType.toString()=="bulletBlock"){
 		b = new BulletBlock(this);
-	}else if(blockType.toString()=="pageBlock"){
+	}else if(blockType.toString()=="pageBlock" || blockType.toString()=="databaseBlock"){
 		int id=1;
+		QString type = (blockType.toString() == "databaseBlock") ? "DataBase" : "note";
 		if(callback){
-			id = callback(getPageData()->id);
+			id = callback(getPageData()->id, type);
+			qDebug()<<" id : "<<id;
 		}
 		PageBlock *pb = new PageBlock(this);
 		pb->setPageId(id);
@@ -141,16 +143,20 @@ void PageModel::removeRow(const int index){
 }
 
 QByteArray PageModel::listToJson(){
-	QJsonArray array;
-	QJsonObject obj;
+    QJsonObject root;
+    if (pageData && !pageData->content.isEmpty()) {
+        QJsonDocument doc = QJsonDocument::fromJson(pageData->content);
+        if (doc.isObject()) root = doc.object();
+    }
 
+	QJsonArray array;
 	for(auto item : realList){
 		if(!item->parentBlock())
 			array.append(item->blockToJson());
 	}
-	obj["blockList"]=array;
+	root["blockList"]=array;
 
-	QJsonDocument doc(obj);
+	QJsonDocument doc(root);
 	QByteArray res = doc.toJson(QJsonDocument::Compact);
 	return res;
 }
