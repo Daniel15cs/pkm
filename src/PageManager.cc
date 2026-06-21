@@ -7,6 +7,10 @@
 
 #include "DatabaseModel.h"
 #include <QDateTime>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <functional>
 
 void PageManager::setFileModel(FileModel *fm){
 	this->fileModel = fm;
@@ -25,6 +29,7 @@ int PageManager::appendPageToList(int parentId, QString type){
 	pd->parentId= parentId;
 	pd->type = type;
 	pd->createdAt = QDateTime::currentDateTime().toString("dd.MM.yyyy");
+	pd->title = "Unnamed";
 
 	PageModel  *pm =new PageModel(this);
 	pm->setPageData(pd);
@@ -45,7 +50,7 @@ int PageManager::appendPageToList(int parentId, QString type){
 void PageManager::uploadList(){ // parse from raw sqlite data to model
 	qDebug()<<"uploadList";
 	this->pagesList.clear();
-	for(PageData item : fileModel->getPagesListFromSql()){
+	for(PageData item : fileModel->getPagesListByParentFromSql(0)){
 		PageData *pd = new PageData(item);
 
 		PageModel *pm = new PageModel(this);
@@ -60,6 +65,7 @@ void PageManager::uploadList(){ // parse from raw sqlite data to model
 
 		QString contentStr = fileModel->getPageContentFromSql(item.id);
 		pm->parseJson(contentStr);
+        item.content = contentStr.toUtf8();
 
 		if(item.type == "DataBase") {
 			dbm->load(item.id, contentStr.toUtf8());
@@ -68,6 +74,24 @@ void PageManager::uploadList(){ // parse from raw sqlite data to model
 		Page p = {item, pm, dbm};
 		this->pagesList.append(p);
 	} 
+    // Also check for -1 if no 0s found, or just load both.
+    if(pagesList.isEmpty()) {
+        for(PageData item : fileModel->getPagesListByParentFromSql(-1)){
+            PageData *pd = new PageData(item);
+            PageModel *pm = new PageModel(this);
+            pm->setPageData(pd);
+            pm->callback = [&](int parentId, QString type)->int{ return this->appendPageToList(parentId, type); };
+            DatabaseModel *dbm = new DatabaseModel(this);
+            dbm->setManager(this);
+            QString contentStr = fileModel->getPageContentFromSql(item.id);
+            pm->parseJson(contentStr);
+            item.content = contentStr.toUtf8();
+            if(item.type == "DataBase") dbm->load(item.id, contentStr.toUtf8());
+            Page p = {item, pm, dbm};
+            this->pagesList.append(p);
+        }
+    }
+    emit pagesChanged();
 	if(!pagesList.isEmpty()) setCurrentPage(pagesList[0].data.id);
 }
 
@@ -96,15 +120,42 @@ PageManager::PageManager(FileModel* fm){
 		// currentPage = pagesList[0];
 }
 void PageManager::setCurrentPage(int id){
+    if (currentPage.data.id != -1 && currentPage.data.id != id) {
+        // Only push to history if it's not the same as the last entry
+        if (historyStack.isEmpty() || historyStack.last() != currentPage.data.id) {
+            historyStack.append(currentPage.data.id);
+        }
+    }
+
 		lastPage = currentPage;
+        bool found = false;
 		for(auto item:pagesList) {
 			if(item.data.id==id){
 				currentPage=item;
 				emit currPageChanged(currentPage);
-				// qDebug()<<"setCurrentPage id: "<<id;
+                found = true;
+                break;
 			}
 		}
-		// currentPage = pagesList.at(id);
+        if(!found) {
+            // Load from DB
+            PageData pd = fileModel->getPageDataFromSql(id);
+            if(pd.id != -1) {
+                PageModel *pm = new PageModel(this);
+                pm->setPageData(new PageData(pd));
+                pm->callback = [&](int parentId, QString type)->int{ return this->appendPageToList(parentId, type); };
+                QString contentStr = fileModel->getPageContentFromSql(id);
+                pm->parseJson(contentStr);
+                DatabaseModel *dbm = new DatabaseModel(this);
+                dbm->setManager(this);
+                if(pd.type == "DataBase") dbm->load(id, contentStr.toUtf8());
+                Page p = {pd, pm, dbm};
+                pagesList.append(p);
+                currentPage = p;
+                emit currPageChanged(currentPage);
+                emit pagesChanged();
+            }
+        }
 }
 
 Page PageManager::getCurrentPage(){
@@ -114,23 +165,64 @@ Page PageManager::getCurrentPage(){
 			return item;
 		}
 	}
-	return Page();
+	return currentPage;
 }
 void PageManager::getToLastPage(){
-	// setCurrentPage(lastPage.data.id);
-	setCurrentPage(currentPage.data.parentId);
+    if (!historyStack.isEmpty()) {
+        int previousId = historyStack.takeLast();
+        int targetId = previousId;
+        for(auto item:pagesList) {
+            if(item.data.id==targetId){
+                currentPage=item;
+                emit currPageChanged(currentPage);
+                return;
+            }
+        }
+
+        PageData pd = fileModel->getPageDataFromSql(targetId);
+        if(pd.id != -1) {
+            PageModel *pm = new PageModel(this);
+            pm->setPageData(new PageData(pd));
+            pm->callback = [&](int parentId, QString type)->int{ return this->appendPageToList(parentId, type); };
+            QString contentStr = fileModel->getPageContentFromSql(targetId);
+            pm->parseJson(contentStr);
+            DatabaseModel *dbm = new DatabaseModel(this);
+            dbm->setManager(this);
+            if(pd.type == "DataBase") dbm->load(targetId, contentStr.toUtf8());
+            Page p = {pd, pm, dbm};
+            pagesList.append(p);
+            currentPage = p;
+            emit currPageChanged(currentPage);
+            emit pagesChanged();
+        }
+    }
 }
 void PageManager::savePagesList(){
 	QVector<PageData> pdList;
-	
-	for(auto item:pagesList){
+	qDebug() << "PageManager::savePagesList() saving" << pagesList.size() << "pages";
+	for(auto &item : pagesList){
 		PageData pd = item.data;
 		pd.content = item.model->listToJson();
-		// qDebug()<<pd.content;
+        item.data.content = pd.content; // Keep in-memory data in sync
 		pdList.append(pd);
 	}
 
-	qDebug()<<"saveList: " << fileModel->updateListToDb(pdList);
+	bool ok = fileModel->updateListToDb(pdList);
+    qDebug() << "saveList result: " << ok;
+    emit pagesChanged(); // Refresh sidebar titles
+}
+
+void PageManager::setPageTitle(int id, const QString &title) {
+    for (int i = 0; i < pagesList.size(); ++i) {
+        if (pagesList[i].data.id == id) {
+            pagesList[i].data.title = title;
+            if (fileModel) {
+                fileModel->setDataToSql(pagesList[i].data, id);
+            }
+            emit pagesChanged();
+            break;
+        }
+    }
 }
 
 Page PageManager::getPageById(int id){
@@ -139,14 +231,66 @@ Page PageManager::getPageById(int id){
 			return item;
 		}
 	}
+    // Load from DB if not found?
 	return Page();
+}
+
+QString PageManager::getPageTitle(int id) {
+    QString title;
+    QByteArray content;
+
+    // Check in memory first
+    bool found = false;
+    for (const auto &p : pagesList) {
+        if (p.data.id == id) {
+            title = p.data.title;
+            content = p.data.content;
+            if (content.isEmpty() && p.model) content = p.model->listToJson();
+            found = true;
+            break;
+        }
+    }
+
+    if (!found && fileModel) {
+        // Check in DB
+        PageData pd = fileModel->getPageDataFromSql(id);
+        title = pd.title;
+        content = pd.content;
+    }
+
+    if (!title.isEmpty() && title != "Unnamed") return title;
+
+    // Try to extract from content
+    if (!content.isEmpty()) {
+        QJsonDocument doc = QJsonDocument::fromJson(content);
+        if (doc.isObject()) {
+            QJsonArray blocks = doc.object()["blockList"].toArray();
+            if (!blocks.isEmpty()) {
+                QJsonObject firstBlock = blocks[0].toObject();
+                QString text = firstBlock["content"].toObject()["text"].toString();
+                if (!text.isEmpty()) return text;
+            }
+        }
+    }
+
+    return title.isEmpty() ? "Unnamed" : title;
 }
 
 QVector<PageData> PageManager::getPagesByParent(int parentId) {
     QVector<PageData> result;
+    QSet<int> ids;
     for (const auto &p : pagesList) {
         if (p.data.parentId == parentId) {
             result.append(p.data);
+            ids.insert(p.data.id);
+        }
+    }
+    // Also fetch from DB for nested pages not yet in memory
+    if (fileModel) {
+        for (const auto &pd : fileModel->getPagesListByParentFromSql(parentId)) {
+            if (!ids.contains(pd.id)) {
+                result.append(pd);
+            }
         }
     }
     return result;
@@ -156,10 +300,87 @@ void PageManager::updatePageContent(int pageId, const QByteArray &content) {
     for (int i = 0; i < pagesList.size(); ++i) {
         if (pagesList[i].data.id == pageId) {
             pagesList[i].data.content = content;
+
             if (fileModel) {
                 fileModel->setDataToSql(pagesList[i].data, pageId);
             }
             break;
         }
     }
+}
+
+QVariantList PageManager::rootPages() {
+    QVariantList roots;
+    qDebug() << "PageManager::rootPages() called. pagesList size:" << pagesList.size();
+    for (const auto &p : pagesList) {
+        // Any page that has no parent (0 or -1) is considered a root page.
+        if (p.data.parentId <= 0) {
+            QVariantMap m;
+            m["id"] = p.data.id;
+            m["title"] = getPageTitle(p.data.id);
+            roots.append(m);
+            qDebug() << "Adding root page:" << m["id"] << m["title"];
+        }
+    }
+    return roots;
+}
+
+static QString extractSearchableText(const QByteArray &content) {
+    QString text;
+    QJsonDocument doc = QJsonDocument::fromJson(content);
+    if (!doc.isObject()) return QString();
+    
+    std::function<void(const QJsonArray&)> walk = [&](const QJsonArray &blocks) {
+        for (const auto &v : blocks) {
+            QJsonObject b = v.toObject();
+            QJsonObject c = b["content"].toObject();
+            if (c.contains("text")) text += c["text"].toString() + " ";
+            if (b.contains("children")) walk(b["children"].toArray());
+        }
+    };
+    
+    walk(doc.object()["blockList"].toArray());
+    QJsonArray props = doc.object()["properties"].toArray();
+    for (const auto &v : props) text += v.toObject()["value"].toString() + " ";
+    return text;
+}
+
+QVariantList PageManager::search(const QString &query) {
+    QVariantList results;
+    QSet<int> foundIds;
+    QString queryLower = query.toLower();
+
+    qDebug() << "PageManager::search() query:" << query;
+
+    // 1. Search in open pages (memory)
+    for (const auto &p : pagesList) {
+        QByteArray content = p.data.content.isEmpty() ? p.model->listToJson() : p.data.content;
+        QString searchable = extractSearchableText(content) + p.data.title;
+        if (searchable.toLower().contains(queryLower)) {
+            QVariantMap m;
+            m["id"] = p.data.id;
+            m["title"] = getPageTitle(p.data.id);
+            results.append(m);
+            foundIds.insert(p.data.id);
+        }
+    }
+
+    // 2. Search in DB
+    QVariantList dbResults = fileModel->searchInDb(query);
+    for (const QVariant &v : dbResults) {
+        QVariantMap m = v.toMap();
+        int id = m["id"].toInt();
+        if (!foundIds.contains(id)) {
+            // Refine search to avoid JSON keys
+            QByteArray content = fileModel->getPageContentFromSql(id).toUtf8();
+            QString searchable = extractSearchableText(content) + m["title"].toString();
+            if (searchable.toLower().contains(queryLower)) {
+                m["title"] = getPageTitle(id);
+                results.append(m);
+                foundIds.insert(id);
+            }
+        }
+    }
+
+    return results;
 }

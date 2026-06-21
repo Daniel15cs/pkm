@@ -14,7 +14,7 @@ class TestFileModel: public QObject{
 
 private slots:
 	void init(){
-		list = {PageData{1,-1, "note", "01.01.2026", "bla bla bla"}};
+		list = {PageData{1,-1, "note", "01.01.2026", "", "bla bla bla"}};
 		fm = new FileModel();
 		fm->openDb(":memory:");
 

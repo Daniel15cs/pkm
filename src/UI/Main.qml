@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
+import QtQuick.Layouts
 // import myPageBlock
 pragma ComponentBehavior: Bound
 ApplicationWindow {
@@ -12,6 +13,16 @@ ApplicationWindow {
 	color: "black"
 	// onActiveFocusItemChanged: print(activeFocusItem)
 
+	property bool sidebarVisible: true
+
+    Shortcut {
+        sequence: "Ctrl+E"
+        onActivated: {
+            searchPanel.visible = true
+            searchField.forceActiveFocus()
+        }
+    }
+
 	MessageDialog{
 		id:clearConfirm
 		title: "Confirm"
@@ -21,20 +32,91 @@ ApplicationWindow {
 	}
 	Rectangle{
 		id: menuRect
-		color:"grey"
-		width: root.width/4
+		color:"#222"
+		width: root.sidebarVisible ? root.width/4 : 0
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
 		anchors.left: parent.left
-		anchors.right: pageItemdel.left
-		Grid{
-			columns:1
+		clip: true
+
+		Behavior on width {
+			NumberAnimation { duration: 250; easing.type: Easing.InOutQuad }
+		}
+
+		ColumnLayout {
+			anchors.fill: parent
+			anchors.margins: 10
+			spacing: 10
+			visible: root.sidebarVisible
+			
 			Text{
 				id: pathText
-				text: "Path"
+				text: "Explorer"
+				color: "white"
+				font.bold: true
+				Layout.fillWidth: true
 			}
+
+			Button{
+				text:"Search"
+				Layout.fillWidth: true
+				onClicked: {
+					searchPanel.visible = true
+					searchField.forceActiveFocus()
+				}
+			}
+
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    text: "Notes"
+                    color: "#aaa"
+                    font.pixelSize: 12
+                    font.bold: true
+                    Layout.fillWidth: true
+                }
+                Button {
+                    text: "+"
+                    implicitWidth: 24
+                    implicitHeight: 24
+                    onClicked: {
+                        var newId = p_pageManager.appendPageToList(0)
+                        p_pageManager.setCurrentPage(newId)
+                    }
+                    background: Rectangle {
+                        color: parent.hovered ? "#444" : "transparent"
+                        radius: 4
+                    }
+                }
+            }
+
+			ListView {
+				id: rootPagesList
+				Layout.fillWidth: true
+				Layout.fillHeight: true
+				model: p_pageManager.rootPages
+				clip: true
+				delegate: ItemDelegate {
+					required property var modelData
+					width: rootPagesList.width
+					onClicked: {
+						p_pageManager.setCurrentPage(modelData.id)
+					}
+					contentItem: Text {
+						text: modelData.title
+						color: "white"
+						elide: Text.ElideRight
+						verticalAlignment: Text.AlignVCenter
+					}
+					background: Rectangle {
+						color: highlighted ? "#444" : "transparent"
+					}
+				}
+			}
+
 			Button{
 				text:"Upload"
+				Layout.fillWidth: true
 				onClicked: {
 					if(p_pageManager.p_currentPage.model.rowCount()>0)
 						clearConfirm.open()
@@ -44,23 +126,45 @@ ApplicationWindow {
 			Button{
 				id: saveBtn
 				text: "Save"
+				Layout.fillWidth: true
 				onClicked:{
 					p_pageManager.savePagesList()
 				}
 			}
 			Button{
 				text:"Go back"
+				Layout.fillWidth: true
 				onPressed:{
 					p_pageManager.getToLastPage()
 				}
 			}
 		}
 	}
+
+	Button {
+		id: sidebarToggle
+		text: root.sidebarVisible ? "◀" : "▶"
+		z: 100
+		width: 24
+		height: 24
+		anchors.top: parent.top
+		anchors.topMargin: 5
+		anchors.left: menuRect.right
+		anchors.leftMargin: 5
+		onClicked: root.sidebarVisible = !root.sidebarVisible
+		background: Rectangle {
+			color: "#333"
+			radius: 4
+			opacity: 0.8
+		}
+	}
+
 	Loader{
 		id:pageLoader
 		sourceComponent: pageItemdel
 		anchors.right: parent.right
-		anchors.left: menuRect.right
+		anchors.left: sidebarToggle.right
+		anchors.leftMargin: 5
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
 		onLoaded:{
@@ -83,5 +187,82 @@ ApplicationWindow {
 		}
 	}
 
+	Rectangle {
+		id: searchPanel
+		anchors.fill: parent
+		color: "#AA000000"
+		visible: false
+		z: 1000
+
+		MouseArea {
+			anchors.fill: parent
+			onClicked: searchPanel.visible = false
+		}
+
+		Rectangle {
+			width: parent.width * 0.6
+			height: parent.height * 0.6
+			color: "#333"
+			radius: 8
+			anchors.centerIn: parent
+			clip: true
+
+            Shortcut {
+                enabled: searchPanel.visible
+                sequence: "Esc"
+                onActivated: searchPanel.visible = false
+            }
+
+			ColumnLayout {
+				anchors.fill: parent
+				anchors.margins: 15
+				spacing: 10
+
+				TextField {
+					id: searchField
+					placeholderText: "Search content..."
+					Layout.fillWidth: true
+					color: "white"
+					placeholderTextColor: "#888"
+					background: Rectangle {
+						color: "#444"
+						radius: 4
+					}
+					onTextChanged: {
+						if (text.length > 2) {
+							searchResults.model = p_pageManager.search(text)
+						} else {
+							searchResults.model = []
+						}
+					}
+				}
+
+				ListView {
+					id: searchResults
+					Layout.fillWidth: true
+					Layout.fillHeight: true
+					clip: true
+					delegate: ItemDelegate {
+						required property var modelData
+						width: parent.width
+						onClicked: {
+							p_pageManager.setCurrentPage(modelData.id)
+							searchPanel.visible = false
+						}
+						contentItem: Column {
+							Text {
+								text: modelData.title
+								color: "white"
+								font.bold: true
+							}
+						}
+						background: Rectangle {
+							color: highlighted ? "#555" : "transparent"
+						}
+					}
+				}
+			}
+		}
+	}
 
 }

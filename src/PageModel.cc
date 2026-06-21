@@ -120,8 +120,14 @@ bool PageModel::insert(QVariant blockType, const int _index){
 	}
 
 	this->beginInsertRows(QModelIndex(), rc,rc);
+	if (rc < blockList.size()) {
+		int realIndex = realList.indexOf(blockList.at(rc));
+		if (realIndex != -1) realList.insert(realIndex, b);
+		else realList.append(b);
+	} else {
+		realList.append(b);
+	}
 	blockList.insert(rc,b);
-	realList.append(b);
 	this->endInsertRows();
 	return true;
 }

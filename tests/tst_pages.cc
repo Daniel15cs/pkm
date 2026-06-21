@@ -358,17 +358,18 @@ private slots:
         QCOMPARE(pm.getCurrentPage().data.id, p2);
     }
 
-    void testGetToLastPageUsesParent()
+    void testGetToLastPageUsesHistory()
     {
         PageManager pm(fileModel);
 
-        int parent = pm.appendPageToList(0);
-        int child  = pm.appendPageToList(parent);
+        int pageA = pm.appendPageToList(0);
+        int pageB = pm.appendPageToList(0);
 
-        pm.setCurrentPage(child);
+        pm.setCurrentPage(pageA);
+        pm.setCurrentPage(pageB);
         pm.getToLastPage();
 
-        QCOMPARE(pm.getCurrentPage().data.id, parent);
+        QCOMPARE(pm.getCurrentPage().data.id, pageA);
     }
 
     void testPageBlockCallbackCreatesNewPage()

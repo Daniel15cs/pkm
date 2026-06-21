@@ -3,53 +3,59 @@ import QtQuick.Controls
 import PKM_03_qml
 pragma ComponentBehavior: Bound
 
-Column {
+Rectangle {
 	id: root
 	property string title
 	property string status
-	property int _width: 100
+	property int _width: 200
 	required property var dbModel
-	Rectangle{
-		// anchors.fill: parent
-		color: "grey"
-	}
+	color: "#222"
+	radius: 5
+	border.color: "#333"
 
-	Text {
-		text: root.title
-		font.bold: true
-		color: "white"
-		padding: 5
-	}
+	Column {
+		anchors.fill: parent
+		anchors.margins: 5
+		spacing: 5
 
-	ListView {
-		id: cardList
-		width: root._width
-		height: parent.height - 30
-		// clip: true
-		model: DatabaseSortProxyModel {
-			id: columnProxy
-			sourceModel: root.dbModel
-			filterStatus: root.status
-
-			Component.onCompleted: {
-				let pid = root.dbModel.getPropertyIdByName("status")
-				if (pid !== -1) setFilterPropertyId(pid)
-				else setFilterPropertyId(1) // Fallback to 1
-			}
+		Text {
+			text: root.title
+			font.bold: true
+			color: "white"
+			padding: 5
 		}
 
-		delegate: ItemDelegate {
-			required property var pageId
-			required property var model
-			id: cardDelegate
-			width: root._width
-			height: 50
-			text: model.display || ""
+		ListView {
+			id: cardList
+			width: parent.width
+			height: parent.height - 40
+			clip: true
+			spacing: 5
+			model: DatabaseSortProxyModel {
+				id: columnProxy
+				sourceModel: root.dbModel
+				filterStatus: root.status
+
+				Component.onCompleted: {
+					let pid = root.dbModel.getPropertyIdByName("status")
+					if (pid !== -1) setFilterPropertyId(pid)
+					else setFilterPropertyId(1) // Fallback to 1
+				}
+			}
+
+			delegate: ItemDelegate {
+				required property var pageId
+				required property var model
+				id: cardDelegate
+				width: cardList.width - 10
+				x: 5
+				// height: 50
+				text: model.display || ""
 
 			// Drag and Drop
 			// Drag.active: dragArea.drag.active
 			// Drag.active: dragArea.drag.active && dragArea.pressed
-			Drag.hotSpot.x: root._width / 2
+			Drag.hotSpot.x: width / 2
 			Drag.hotSpot.y: height / 2
 			Drag.mimeData: { 
 				"text/plain": pageId.toString(), 
@@ -68,12 +74,38 @@ Column {
 				opacity: dragArea.drag.active ? 0.7 : 1.0
 			}
 
-			contentItem: Text {
-				text: cardDelegate.text
-				color: "white"
-				elide: Text.ElideRight
-				verticalAlignment: Text.AlignVCenter
+			contentItem: Column {
+				id: cardContent
+				spacing: 4
 				leftPadding: 10
+				rightPadding: 10
+				topPadding: 5
+				bottomPadding: 5
+
+				Text {
+					text: cardDelegate.text
+					color: "white"
+					font.bold: true
+					elide: Text.ElideRight
+					width: cardContent.width - 20
+				}
+
+				Repeater {
+					model: root.dbModel.schema
+					delegate: Text {
+						required property var modelData
+						visible: modelData.visibleKanban
+						text: {
+							let val = root.dbModel.getPropertyByPageId(cardDelegate.pageId, modelData.id);
+							if (val === undefined || val === null || val === "") return "";
+							return modelData.name + ": " + (Array.isArray(val) ? val.join(", ") : val);
+						}
+						color: "#aaa"
+						font.pixelSize: 10
+						elide: Text.ElideRight
+						width: cardContent.width - 20
+					}
+				}
 			}
 
 			MouseArea {
@@ -124,4 +156,5 @@ Column {
 			}
 		}
 	}
+}
 }

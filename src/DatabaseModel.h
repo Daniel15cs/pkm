@@ -6,10 +6,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include "filemodel.h"
 #include "PageManager.h"
-
-class FileModel;
 
 struct PropertySchema {
     int id;
@@ -47,6 +44,16 @@ public:
     Q_INVOKABLE void setPropertyByPageId(int pageId, int propertyId, const QVariant &value);
     Q_INVOKABLE int getPropertyIdByName(const QString &name) const;
 
+    // Schema Management
+    Q_INVOKABLE void addProperty(const QString &name, const QString &type);
+    Q_INVOKABLE void removeProperty(int propertyId);
+    Q_INVOKABLE void renameProperty(int propertyId, const QString &newName);
+    Q_INVOKABLE void addPropertyValue(int propertyId, const QString &value);
+    
+    // Visibility Management
+    Q_INVOKABLE bool isPropertyVisible(int propertyId, const QString &viewType) const;
+    Q_INVOKABLE void setPropertyVisible(int propertyId, const QString &viewType, bool visible);
+
     QVariantList schema() const;
     PageManager* manager() const { return m_PageManager; }
     void setManager(PageManager*);
@@ -54,16 +61,19 @@ public:
 signals:
     void schemaChanged();
     void managerChanged();
+    void propertyChanged(int pageId, int propertyId, const QVariant &value);
 
 private:
     void parseSchema(const QByteArray &dbContent);
+    void saveSchema();
+    void loadVisibility();
     QVariant getPropertyValue(const PageData &page, int propertyId) const;
 
     int m_parentId;
     QVector<PageData> m_childPages;
     QVector<PropertySchema> m_schema;
-    QByteArray m_lastContent;
-		PageManager * m_PageManager;
+    PageManager * m_PageManager;
+    QMap<QString, QSet<int>> m_visiblePropertiesCache;
 };
 
 #endif // DATABASEMODEL_H

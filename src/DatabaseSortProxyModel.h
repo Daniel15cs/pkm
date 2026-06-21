@@ -16,6 +16,8 @@ public:
     Q_INVOKABLE void sortByColumn(int column, Qt::SortOrder order);
     Q_INVOKABLE void setFilterPropertyId(int propertyId);
 
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
 signals:
     void filterStatusChanged();
 

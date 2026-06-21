@@ -15,22 +15,22 @@ Item {
         anchors.margins: 5
 
         KanbanColumn {
-            title: "To Do"
-            status: "todo"
+            title: "To-Do"
+            status: "To-Do"
             dbModel: root.dbModel
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
         KanbanColumn {
             title: "In Progress"
-            status: "in-progress" 
+            status: "In-progress" 
             dbModel: root.dbModel
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
         KanbanColumn {
             title: "Done"
-            status: "done"
+            status: "Done"
             dbModel: root.dbModel
             Layout.fillWidth: true
             Layout.fillHeight: true

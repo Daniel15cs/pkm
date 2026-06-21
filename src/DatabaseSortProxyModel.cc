@@ -24,6 +24,11 @@ void DatabaseSortProxyModel::sortByColumn(int column, Qt::SortOrder order) {
     sort(column, order);
 }
 
+QVariant DatabaseSortProxyModel::headerData(int section, Qt::Orientation orientation, int role) const {
+    if (sourceModel()) return sourceModel()->headerData(section, orientation, role);
+    return QVariant();
+}
+
 bool DatabaseSortProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const {
     if (m_filterStatus.isEmpty() || m_filterPropertyId == -1)
         return true;
@@ -40,8 +45,8 @@ bool DatabaseSortProxyModel::lessThan(const QModelIndex &source_left, const QMod
     QVariant rightData = sourceModel()->data(source_right);
 
     // Try date comparison first
-    QDateTime leftDate = QDateTime::fromString(leftData.toString(), "dd.mm.yyyy");
-    QDateTime rightDate = QDateTime::fromString(rightData.toString(), "dd.mm.yyyy");
+    QDateTime leftDate = QDateTime::fromString(leftData.toString(), "dd.MM.yyyy HH:mm");
+    QDateTime rightDate = QDateTime::fromString(rightData.toString(), "dd.MM.yyyy HH:mm");
 
     if (leftDate.isValid() && rightDate.isValid()) {
         return leftDate < rightDate;

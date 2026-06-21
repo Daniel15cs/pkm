@@ -33,7 +33,7 @@ Item{
 		spacing: 2
 
 		Button{
-			text: "id:"+root.logicObj.p_pageId
+			text: root.pageManager.getPageTitle(root.logicObj.p_pageId)
 			Layout.fillWidth: true
 			Layout.fillHeight: true
 			onPressed:{

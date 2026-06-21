@@ -20,9 +20,10 @@ private slots:
         
         model.load(-1, schemaJson);
         
-        QCOMPARE(model.columnCount(), 3); // Title + 2 properties
-        QCOMPARE(model.headerData(1, Qt::Horizontal).toString(), QString("Status"));
-        QCOMPARE(model.headerData(2, Qt::Horizontal).toString(), QString("Priority"));
+        QCOMPARE(model.columnCount(), 4); // Title + Created At + 2 properties
+        QCOMPARE(model.headerData(1, Qt::Horizontal).toString(), QString("Created At"));
+        QCOMPARE(model.headerData(2, Qt::Horizontal).toString(), QString("Status"));
+        QCOMPARE(model.headerData(3, Qt::Horizontal).toString(), QString("Priority"));
     }
 
     void testPropertyAccess() {
@@ -71,11 +72,11 @@ private slots:
         DatabaseSortProxyModel proxy;
         proxy.setSourceModel(&model);
         
-        proxy.sort(1, Qt::AscendingOrder);
-        QCOMPARE(proxy.data(proxy.index(0, 1)).toString(), QString("01.06.2026"));
+        proxy.sort(2, Qt::AscendingOrder);
+        QCOMPARE(proxy.data(proxy.index(0, 2)).toString(), QString("01.06.2026"));
         
-        proxy.sort(1, Qt::DescendingOrder);
-        QCOMPARE(proxy.data(proxy.index(0, 1)).toString(), QString("10.06.2026"));
+        proxy.sort(2, Qt::DescendingOrder);
+        QCOMPARE(proxy.data(proxy.index(0, 2)).toString(), QString("10.06.2026"));
     }
 
     void testFiltering() {
@@ -101,11 +102,11 @@ private slots:
         
         proxy.setFilterStatus("todo");
         QCOMPARE(proxy.rowCount(), 1);
-        QCOMPARE(proxy.data(proxy.index(0, 1)).toString(), QString("todo"));
+        QCOMPARE(proxy.data(proxy.index(0, 2)).toString(), QString("todo"));
         
         proxy.setFilterStatus("done");
         QCOMPARE(proxy.rowCount(), 1);
-        QCOMPARE(proxy.data(proxy.index(0, 1)).toString(), QString("done"));
+        QCOMPARE(proxy.data(proxy.index(0, 2)).toString(), QString("done"));
         
         proxy.setFilterStatus("missing");
         QCOMPARE(proxy.rowCount(), 0);

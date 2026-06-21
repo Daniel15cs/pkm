@@ -32,6 +32,8 @@ qt_add_qml_module(appPKM_03_qml
 				UI/DBKanbanView.qml
 				UI/DBListView.qml
 				UI/KanbanColumn.qml
+				UI/CalendarDialog.qml
+				UI/PropertyEditorDialog.qml
 		SOURCES
 				QML_FILES UI/ToggleItem.qml
 )

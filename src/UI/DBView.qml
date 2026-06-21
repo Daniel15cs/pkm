@@ -10,78 +10,135 @@ Item {
 	required property var page
 
 	// Reference to the active proxy model for sorting
-	property var activeProxyModel: viewLoader.item.pModel ??null
+	property var activeProxyModel: viewLoader.item ? viewLoader.item.proxyModel : null
+	property string activeViewType: {
+		if (viewLoader.source.toString().includes("DBTableView.qml")) return "table";
+		if (viewLoader.source.toString().includes("DBKanbanView.qml")) return "kanban";
+		if (viewLoader.source.toString().includes("DBListView.qml")) return "list";
+		return "table";
+	}
 
 	ColumnLayout {
 		anchors.fill: parent
 		spacing: 0
+		clip: true
 
 		// Header
 		Rectangle {
 			Layout.fillWidth: true
-			Layout.preferredHeight: 50
+			Layout.preferredHeight: 100
 			color: "#1a1a1a"
+			z: 2
 
-			RowLayout {
+			ColumnLayout {
 				anchors.fill: parent
-				anchors.leftMargin: 10
-				anchors.rightMargin: 10
+				anchors.margins: 10
 				spacing: 10
 
-				// View Switcher
+				TextField {
+					id: dbTitle
+					text: root.pageManager.getPageTitle(root.page.p_data.id)
+					placeholderText: "Database Name"
+					Layout.fillWidth: true
+					font.pixelSize: 22
+					font.bold: true
+					color: "white"
+					horizontalAlignment: Text.AlignHCenter
+					background: Item {}
+				}
+
 				RowLayout {
-					spacing: 2
-					Button {
-						text: "Table"
-						highlighted: viewLoader.source.toString().includes("DBTableView.qml")
-						onClicked: viewLoader.loadSource("DBTableView.qml")
+					Layout.fillWidth: true
+					spacing: 8
+
+					// View Switcher
+					RowLayout {
+						spacing: 2
+						Button {
+							text: "Table"
+							implicitHeight: 28
+							font.pixelSize: 12
+							highlighted: root.activeViewType === "table"
+							onClicked: viewLoader.loadSource("DBTableView.qml")
+						}
+						Button {
+							text: "Kanban"
+							implicitHeight: 28
+							font.pixelSize: 12
+							highlighted: root.activeViewType === "kanban"
+							onClicked: viewLoader.loadSource("DBKanbanView.qml")
+						}
+						Button {
+							text: "List"
+							implicitHeight: 28
+							font.pixelSize: 12
+							highlighted: root.activeViewType === "list"
+							onClicked: viewLoader.loadSource("DBListView.qml")
+						}
 					}
+
+					Item { Layout.fillWidth: true }
+
+					// Actions
 					Button {
-						text: "Kanban"
-						highlighted: viewLoader.source.toString().includes("DBKanbanView.qml")
-						onClicked: viewLoader.loadSource("DBKanbanView.qml")
-					}
-					Button {
-						text: "List"
-						highlighted: viewLoader.source.toString().includes("DBListView.qml")
-						onClicked: viewLoader.loadSource("DBListView.qml")
-					}
-				}
-
-				Item { Layout.fillWidth: true }
-
-				// Actions
-				Button {
-					text: "+ Add Note"
-					onClicked: root.page.dbModel.addNote()
-				}
-
-				Button {
-					id: sortBtn
-					text: "Sort"
-					onClicked: sortMenu.popup()
-
-					Menu {
-						id: sortMenu
-						title: "Sort by Property"
-
-						Repeater {
-							model: root.page.dbModel.schema
-							MenuItem {
-								required property var model
-								text: model.name + " (Asc)"
-								onClicked: if(root.activeProxyModel) root.activeProxyModel.sortByColumn(model.index + 1, Qt.AscendingOrder)
+						text: "Visibility"
+						implicitHeight: 28
+						font.pixelSize: 12
+						onClicked: visibilityMenu.popup()
+						
+						Menu {
+							id: visibilityMenu
+							Repeater {
+								model: root.page.dbModel.schema
+								MenuItem {
+									required property var modelData
+									text: modelData.name
+									checkable: true
+									checked: root.page.dbModel.isPropertyVisible(modelData.id, root.activeViewType)
+									onTriggered: root.page.dbModel.setPropertyVisible(modelData.id, root.activeViewType, checked)
+								}
 							}
 						}
+					}
 
-						MenuSeparator { visible: root.page.dbModel.schema.length > 0 }
+					Button {
+						text: "+ Add Note"
+						implicitHeight: 28
+						font.pixelSize: 12
+						onClicked: root.page.dbModel.addNote()
+					}
 
-						Repeater {
-							model: root.page.dbModel.schema
-							MenuItem {
-								required property var model
-								text: model.name + " (Desc)"
-								onClicked: if(root.activeProxyModel) root.activeProxyModel.sortByColumn(model.index + 1, Qt.DescendingOrder)
+					Button {
+						id: sortBtn
+						text: "Sort"
+						implicitHeight: 28
+						font.pixelSize: 12
+						onClicked: sortMenu.popup()
+
+						Menu {
+							id: sortMenu
+							title: "Sort by Property"
+
+							Repeater {
+								model: root.page.dbModel.schema
+								MenuItem {
+									required property var modelData
+									required property int index
+									text: modelData.name + " (Asc)"
+									onClicked: if(root.activeProxyModel) root.activeProxyModel.sortByColumn(index + 1, Qt.AscendingOrder)
+								}
+							}
+
+							MenuSeparator { visible: root.page.dbModel.schema.length > 0 }
+
+							Repeater {
+								model: root.page.dbModel.schema
+								MenuItem {
+									required property var modelData
+									required property int index
+									text: modelData.name + " (Desc)"
+									onClicked: if(root.activeProxyModel) root.activeProxyModel.sortByColumn(index + 1, Qt.DescendingOrder)
+								}
 							}
 						}
 					}
