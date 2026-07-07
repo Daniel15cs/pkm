@@ -10,7 +10,7 @@ Item{
 	property var page: pageManager.p_currentPage
 
 	//TODO:
-	// implicitHeight: loader.item ? loader.item.height : 24
+	implicitHeight: loader.item ? loader.item.height : 24
 	height:24
 	required property int index
 	required property var flickable

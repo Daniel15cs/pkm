@@ -18,6 +18,11 @@ void PageManager::setFileModel(FileModel *fm){
 
 int PageManager::appendPageToList(int parentId, QString type){
 	int maxId = 0;
+	if(fileModel){
+		for(const auto& p : fileModel->getPagesListFromSql()) {
+			if(p.id > maxId) maxId = p.id;
+		}
+	}
 	for(const auto& p : pagesList) {
 		if(p.data.id > maxId) maxId = p.data.id;
 	}
@@ -137,6 +142,7 @@ void PageManager::setCurrentPage(int id){
                 break;
 			}
 		}
+		//BUG: after open nested page, blocks of new page did not appears, instead first block of old page was displayed
         if(!found) {
             // Load from DB
             PageData pd = fileModel->getPageDataFromSql(id);
@@ -238,6 +244,7 @@ Page PageManager::getPageById(int id){
 QString PageManager::getPageTitle(int id) {
     QString title;
     QByteArray content;
+		//TODO: this is a shit
 
     // Check in memory first
     bool found = false;
@@ -250,27 +257,11 @@ QString PageManager::getPageTitle(int id) {
             break;
         }
     }
-
     if (!found && fileModel) {
         // Check in DB
         PageData pd = fileModel->getPageDataFromSql(id);
         title = pd.title;
         content = pd.content;
-    }
-
-    if (!title.isEmpty() && title != "Unnamed") return title;
-
-    // Try to extract from content
-    if (!content.isEmpty()) {
-        QJsonDocument doc = QJsonDocument::fromJson(content);
-        if (doc.isObject()) {
-            QJsonArray blocks = doc.object()["blockList"].toArray();
-            if (!blocks.isEmpty()) {
-                QJsonObject firstBlock = blocks[0].toObject();
-                QString text = firstBlock["content"].toObject()["text"].toString();
-                if (!text.isEmpty()) return text;
-            }
-        }
     }
 
     return title.isEmpty() ? "Unnamed" : title;

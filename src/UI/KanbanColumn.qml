@@ -133,7 +133,7 @@ Rectangle {
 		DropArea {
 			anchors.fill: parent
 			onEntered:(drag)=>{
-				if(drag.getDataAsString("sourceStatus")===root.status){
+				if(drag.getDataAsString("sourceStatus")==root.status){
 					drag.accepted=false
 				}
 			}

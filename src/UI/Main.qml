@@ -6,22 +6,59 @@ import QtQuick.Layouts
 pragma ComponentBehavior: Bound
 ApplicationWindow {
 	id:root
-	width: 640
-	height: 480
+	width: 900
+	height: 500
 	visible: true
 	title: "My_own_PKM"
 	color: "black"
-	// onActiveFocusItemChanged: print(activeFocusItem)
 
 	property bool sidebarVisible: true
+	onSidebarVisibleChanged:{
+			if(root.sidebarVisible == true){ 
+				sidebarToggle.anchors.left = undefined
+				sidebarToggle.anchors.right = menuRect.right
+				checkWidthForSidebar()
+			}
+			else if (root.sidebarVisible == false){
+				menuRect.anchors.fill = undefined
+				sidebarToggle.anchors.right = undefined
+				sidebarToggle.anchors.left = menuRect.right
+			}
+	}
+	function setFocusToEditor(){
+		if(root.width<=400 && root.sidebarVisible){
+			menuRect.anchors.fill = undefined
+			sidebarVisible = false
+		}
+	}
+	function checkWidthForSidebar(){
+		if(root.width<=400){
+			if(root.sidebarVisible){
+				menuRect.anchors.fill = menuRect.parent
+			}	
+		} else{
+			menuRect.width = root.sidebarVisible ? Math.max(200, root.width/4) : 0
+			menuRect.anchors.fill = undefined
+		}
+	}
 
-    Shortcut {
-        sequence: "Ctrl+E"
-        onActivated: {
-            searchPanel.visible = true
-            searchField.forceActiveFocus()
-        }
-    }
+	Shortcut {
+		sequence: "Ctrl+R"
+		onActivated: {
+			searchPanel.visible = true
+			searchField.forceActiveFocus()
+		}
+	}
+	Shortcut {
+		sequence: "Ctrl+E"
+		onActivated: {
+			root.sidebarVisible =! root.sidebarVisible
+			sidebarToggle.reanchor()
+		}
+	}
+	onWidthChanged:{
+		checkWidthForSidebar()
+	}
 
 	MessageDialog{
 		id:clearConfirm
@@ -33,14 +70,14 @@ ApplicationWindow {
 	Rectangle{
 		id: menuRect
 		color:"#222"
-		width: root.sidebarVisible ? root.width/4 : 0
+		width: root.sidebarVisible ? Math.max(200, root.width/4) : 0
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
 		anchors.left: parent.left
 		clip: true
 
 		Behavior on width {
-			NumberAnimation { duration: 250; easing.type: Easing.InOutQuad }
+			NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
 		}
 
 		ColumnLayout {
@@ -48,7 +85,7 @@ ApplicationWindow {
 			anchors.margins: 10
 			spacing: 10
 			visible: root.sidebarVisible
-			
+
 			Text{
 				id: pathText
 				text: "Explorer"
@@ -64,31 +101,35 @@ ApplicationWindow {
 					searchPanel.visible = true
 					searchField.forceActiveFocus()
 				}
+					background: Rectangle {
+						color: parent.hovered ? "#444" : "transparent"
+						radius: 4
+					}
 			}
 
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    text: "Notes"
-                    color: "#aaa"
-                    font.pixelSize: 12
-                    font.bold: true
-                    Layout.fillWidth: true
-                }
-                Button {
-                    text: "+"
-                    implicitWidth: 24
-                    implicitHeight: 24
-                    onClicked: {
-                        var newId = p_pageManager.appendPageToList(0)
-                        p_pageManager.setCurrentPage(newId)
-                    }
-                    background: Rectangle {
-                        color: parent.hovered ? "#444" : "transparent"
-                        radius: 4
-                    }
-                }
-            }
+			RowLayout {
+				Layout.fillWidth: true
+				Text {
+					text: "Notes"
+					color: "#aaa"
+					font.pixelSize: 12
+					font.bold: true
+					Layout.fillWidth: true
+				}
+				Button {
+					text: "+"
+					implicitWidth: 24
+					implicitHeight: 24
+					onClicked: {
+						var newId = p_pageManager.appendPageToList(0)
+						p_pageManager.setCurrentPage(newId)
+					}
+					background: Rectangle {
+						color: parent.hovered ? "#444" : "transparent"
+						radius: 4
+					}
+				}
+			}
 
 			ListView {
 				id: rootPagesList
@@ -101,6 +142,7 @@ ApplicationWindow {
 					width: rootPagesList.width
 					onClicked: {
 						p_pageManager.setCurrentPage(modelData.id)
+						root.setFocusToEditor()
 					}
 					contentItem: Text {
 						text: modelData.title
@@ -117,9 +159,13 @@ ApplicationWindow {
 			Button{
 				text:"Upload"
 				Layout.fillWidth: true
+					background: Rectangle {
+						color: parent.hovered ? "#444" : "transparent"
+						radius: 4
+					}
 				onClicked: {
 					if(p_pageManager.p_currentPage.model.rowCount()>0)
-						clearConfirm.open()
+					clearConfirm.open()
 					else p_pageManager.uploadList()
 				}
 			}
@@ -127,6 +173,10 @@ ApplicationWindow {
 				id: saveBtn
 				text: "Save"
 				Layout.fillWidth: true
+					background: Rectangle {
+						color: parent.hovered ? "#444" : "transparent"
+						radius: 4
+					}
 				onClicked:{
 					p_pageManager.savePagesList()
 				}
@@ -134,6 +184,10 @@ ApplicationWindow {
 			Button{
 				text:"Go back"
 				Layout.fillWidth: true
+					background: Rectangle {
+						color: parent.hovered ? "#444" : "transparent"
+						radius: 4
+					}
 				onPressed:{
 					p_pageManager.getToLastPage()
 				}
@@ -149,9 +203,14 @@ ApplicationWindow {
 		height: 24
 		anchors.top: parent.top
 		anchors.topMargin: 5
-		anchors.left: menuRect.right
+		anchors.right: menuRect.right
+		function reanchor(){
+		}
 		anchors.leftMargin: 5
-		onClicked: root.sidebarVisible = !root.sidebarVisible
+		onClicked: {
+			root.sidebarVisible = !root.sidebarVisible
+			reanchor()
+		}
 		background: Rectangle {
 			color: "#333"
 			radius: 4
@@ -207,11 +266,11 @@ ApplicationWindow {
 			anchors.centerIn: parent
 			clip: true
 
-            Shortcut {
-                enabled: searchPanel.visible
-                sequence: "Esc"
-                onActivated: searchPanel.visible = false
-            }
+			Shortcut {
+				enabled: searchPanel.visible
+				sequence: "Esc"
+				onActivated: searchPanel.visible = false
+			}
 
 			ColumnLayout {
 				anchors.fill: parent

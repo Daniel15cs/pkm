@@ -6,14 +6,18 @@ Item{
 	required property int index
 	required property var listView
 	property var model: listView.model
+	// TODO: logicObj is null
 	required property var logicObj
 
 	// property string _text: logicobject?.text_p==null ? logicobject.text_p : ""
-	property string _text:  logicObj.text_p ?? ""
+	// TODO: logicObj is null
+	property string _text:  logicObj?.text_p ?? ""
 
 	property int _height: compText.contentHeight+6
 	property int _width:100
 	height: _height
+	implicitHeight: _height
+	// TODO: logicObj is null
 	property int leftMargin: logicObj.level*24 ?? 0
 	width:_width - 24 - leftMargin
 	x: leftMargin
@@ -33,6 +37,9 @@ Item{
 		// baseItem.listView.currentItem.height = baseItem._height
 		console.log("tli: logicobject: "+root.logicObj)
 		// console.log("tli: currItem: "+baseItem.listView.currentItem)
+		var item = root.listView.itemAtIndex(index);
+		if(item !=null)
+			item.height = root.height;
 	}
 	function onCurrent(){
 			compText.forceActiveFocus(Qt.TabFocusReason)
@@ -75,8 +82,21 @@ Item{
 				var currItem = root.listView.currentItem
 				if(currItem)
 					currItem.height = root._height
+				if(compText.text=="/"){
+					console.log("open command list")
+				}
 			}
+			function addBlock(type){
+				if(root.index==root.model.rowCount()){
+					root.model.append(type)
+					root.listView.incrementCurrentIndex()
+				}
+				else if(root.index<root.model.rowCount()){
+					root.model.insert(type,root.index+1)
+					root.listView.incrementCurrentIndex()
+				}
 
+			}
 			Keys.onPressed:function(event){
 				if(event.key ===Qt.Key_Return || event.key === Qt.Key_Enter){
 					if(event.modifiers & Qt.ShiftModifier){
@@ -84,16 +104,19 @@ Item{
 					} else{
 						event.accepted = true
 						let type = root.blockType
-						if(compText.text==="/toggle") type ="toggleBlock"
-						else if(compText.text==="/checkbox") type ="checkboxBlock"
-						else if(compText.text==="/bullet") type ="bulletBlock"
-						if(root.index==root.model.rowCount()){
-							root.model.append(type)
-							root.listView.incrementCurrentIndex()
-						}
-						else if(root.index<root.model.rowCount()){
-							root.model.insert(type,root.index+1)
-							root.listView.incrementCurrentIndex()
+						if(compText.text[0]==="/"){
+							//TODO: вивести діалогове вікно з підказками команд
+							//TODO: створити більш універсальну систему команд
+							if(compText.text==="/toggle") type ="toggleBlock"
+							else if(compText.text==="/checkbox") type ="checkboxBlock"
+							else if(compText.text==="/bullet") type ="bulletBlock"
+							else{
+
+							}
+							addBlock(type)
+							root.model.removeRow(root.index)
+						}else{
+							addBlock(root.blockType)
 						}
 					}
 				}else if(compText.text ==="" && event.key===Qt.Key_Backspace){

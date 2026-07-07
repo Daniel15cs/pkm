@@ -44,6 +44,7 @@ Item {
 					font.bold: true
 					color: "white"
 					horizontalAlignment: Text.AlignHCenter
+					onEditingFinished: root.pageManager.setPageTitle(pageViewRoot.page.p_data.id, text)
 					background: Item {}
 				}
 

@@ -19,18 +19,18 @@ private slots:
         QSqlQuery q(fileModel->db);
         // Page 1: Root page, contains "apple"
         QVERIFY(q.exec(R"(
-            INSERT INTO Notes(id, parentId, type, content, created_at)
-            VALUES (1, 0, "note", '{"blockList":[{"type":"textBlock","content":{"text":"This is an apple"}},{"type":"textBlock","content":{"text":"Root page"}}]}', "01.01.2026")
+            INSERT INTO Notes(title, id, parentId, type, content, created_at)
+            VALUES ("apple", 1, 0, "note", '{"blockList":[{"type":"textBlock","content":{"text":"This is an apple"}},{"type":"textBlock","content":{"text":"Root page"}}]}', "01.01.2026")
         )"));
         // Page 2: Child of 1, contains "banana"
         QVERIFY(q.exec(R"(
-            INSERT INTO Notes(id, parentId, type, content, created_at)
-            VALUES (2, 1, "note", '{"blockList":[{"type":"textBlock","content":{"text":"This is a banana"}},{"type":"textBlock","content":{"text":"Child page"}}]}', "01.01.2026")
+            INSERT INTO Notes(title, id, parentId, type, content, created_at)
+            VALUES ("banana",2, 1, "note", '{"blockList":[{"type":"textBlock","content":{"text":"This is a banana"}},{"type":"textBlock","content":{"text":"Child page"}}]}', "01.01.2026")
         )"));
         // Page 3: Root page, contains "cherry"
         QVERIFY(q.exec(R"(
-            INSERT INTO Notes(id, parentId, type, content, created_at)
-            VALUES (3, 0, "note", '{"blockList":[{"type":"textBlock","content":{"text":"This is a cherry"}},{"type":"textBlock","content":{"text":"Another root"}}]}', "01.01.2026")
+            INSERT INTO Notes(title, id, parentId, type, content, created_at)
+            VALUES ("cherry", 3, 0, "note", '{"blockList":[{"type":"textBlock","content":{"text":"This is a cherry"}},{"type":"textBlock","content":{"text":"Another root"}}]}', "01.01.2026")
         )"));
     }
 
@@ -74,7 +74,7 @@ private slots:
         QVariantList results = pm.search("banana");
         QCOMPARE(results.size(), 1);
         QCOMPARE(results[0].toMap()["id"].toInt(), 2);
-        QCOMPARE(results[0].toMap()["title"].toString(), QString("This is a banana"));
+        QCOMPARE(results[0].toMap()["title"].toString(), QString("banana"));
     }
 
     void testRootPagesProperty() {
