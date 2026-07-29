@@ -23,8 +23,12 @@ public:
 	Q_PROPERTY(int id MEMBER id)
 	Q_PROPERTY(int parentId MEMBER parentId)
 	Q_PROPERTY(QString type MEMBER type)
-	int id=1, parentId=-1;
+	Q_PROPERTY(QString createdAt MEMBER createdAt)
+	Q_PROPERTY(QString title MEMBER title)
+	int id=-1, parentId=-1;
 	QString type="note";
+	QString createdAt;
+	QString title;
 	QByteArray content;
 	bool operator==(const PageData&)const =default;
 	QML_VALUE_TYPE(pageData)
@@ -44,6 +48,7 @@ public:
 	QString dbPath;
 	QSqlDatabase db;
 	QVector<PageData> getPagesListFromSql();
+	QVector<PageData> getPagesListByParentFromSql(int parentId);
 
 	bool openDb(QString);
 
@@ -57,6 +62,7 @@ public:
 	bool idCheckInDb(int);
 	bool updateListToDb(QVector<PageData> list);
 	
+	Q_INVOKABLE QVariantList searchInDb(const QString &query);
 
 public slots:
 	//old json operators

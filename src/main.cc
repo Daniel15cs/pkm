@@ -6,6 +6,9 @@
 #include <BlockSystem/pageBlock.h>
 #include "PageManager.h"
 
+#include "DatabaseModel.h"
+#include "DatabaseSortProxyModel.h"
+
 int main(int argc, char *argv[]) {
 	QGuiApplication app(argc, argv);
 	QQmlApplicationEngine engine;
@@ -20,13 +23,13 @@ int main(int argc, char *argv[]) {
 
 	qRegisterMetaType<Page>("page");
 	qRegisterMetaType<PageData>("PageData");
+	qmlRegisterType<DatabaseModel>("PKM_03_qml", 1, 0, "DatabaseModel");
+	qmlRegisterType<DatabaseSortProxyModel>("PKM_03_qml", 1, 0, "DatabaseSortProxyModel");
 
 	PageManager *pageManager = new PageManager(fileModel);
 	// pageManager->setFileModel(fileModel);
 
 	// qmlRegisterType<PageBlock>("myPageBlock",1,0,"PageBlock");
-	qmlRegisterType<Page>("myPage",1,0,"page");
-	qmlRegisterType<PageData>("myPage",1,0,"pageData");
 	
 	QQmlEngine::setObjectOwnership(pageManager, QQmlEngine::CppOwnership); 
 	

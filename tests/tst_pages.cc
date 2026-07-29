@@ -317,17 +317,8 @@ private slots:
         QSqlQuery q(fileModel->db);
 
         QVERIFY(q.exec(R"(
-            CREATE TABLE Notes(
-                id INTEGER PRIMARY KEY NOT NULL,
-                parentId INTEGER NOT NULL DEFAULT -1,
-                type TEXT NOT NULL DEFAULT "note",
-                content TEXT
-            )
-        )"));
-
-        QVERIFY(q.exec(R"(
-            INSERT INTO Notes(id, parentId, type, content)
-            VALUES (1, -1, "note", "bla bla bla")
+            INSERT INTO Notes(id, parentId, type, content, created_at)
+            VALUES (1, -1, "note", "bla bla bla", "01.01.2026")
         )"));
     }
 
@@ -367,17 +358,18 @@ private slots:
         QCOMPARE(pm.getCurrentPage().data.id, p2);
     }
 
-    void testGetToLastPageUsesParent()
+    void testGetToLastPageUsesHistory()
     {
         PageManager pm(fileModel);
 
-        int parent = pm.appendPageToList(0);
-        int child  = pm.appendPageToList(parent);
+        int pageA = pm.appendPageToList(0);
+        int pageB = pm.appendPageToList(0);
 
-        pm.setCurrentPage(child);
+        pm.setCurrentPage(pageA);
+        pm.setCurrentPage(pageB);
         pm.getToLastPage();
 
-        QCOMPARE(pm.getCurrentPage().data.id, parent);
+        QCOMPARE(pm.getCurrentPage().data.id, pageA);
     }
 
     void testPageBlockCallbackCreatesNewPage()

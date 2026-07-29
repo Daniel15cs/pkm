@@ -14,6 +14,8 @@ add_library(core STATIC
 	src/PageModel.cc src/PageModel.h
 	src/filemodel.h src/filemodel.cc
 	src/PageManager.cc src/PageManager.h
+	src/DatabaseModel.cc src/DatabaseModel.h
+	src/DatabaseSortProxyModel.cc src/DatabaseSortProxyModel.h
 	src/BlockSystem/block.h 
 	src/BlockSystem/textBlock.h src/BlockSystem/textBlock.cc
 	src/BlockSystem/checkboxBlock.h src/BlockSystem/checkboxBlock.cc
