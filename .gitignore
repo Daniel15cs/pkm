@@ -1,5 +1,11 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
+compile_commands.json
+qmldir
+make.sh
+.clangd
+apkBuildDir
+*/.qmlls.ini
 .cache/
 Testing/*
 tests/Testing/*
@@ -85,3 +91,5 @@ CMakeLists.txt.user*
 .rcc/
 .uic/
 /build*/
+vibes/*
+Session.vim
