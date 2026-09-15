@@ -3,8 +3,8 @@ find_package(Qt6 REQUIRED COMPONENTS Test Quick)
 
 function(addQtTest name)
 	qt_add_executable(${name} ${name}.cc)
-	target_include_directories(core PUBLIC ../src)
-	target_link_libraries(${name} PRIVATE core Qt6::Test Qt6::Quick Qt6::Core Qt6::Sql)
+	# target_include_directories(core PUBLIC ../src)
+	target_link_libraries(${name} PRIVATE core Qt6::Test)
 	add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
